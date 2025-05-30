@@ -1,0 +1,24 @@
+kurigram
+tgcrypto; sys_platform != 'win32'
+APScheduler
+aiohttp
+jinja2
+beautifulsoup4
+pytz
+uvloop; sys_platform != 'win32'
+openai
+cryptography
+emoji
+sqlitedict
+Pillow
+httpx
+bs4
+requests
+lxml
+imgkit
+wkhtmltopdf
+sqlalchemy
+aiosqlite
+aiomysql
+pypinyin
+toml

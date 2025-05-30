@@ -1,0 +1,43 @@
+#!/bin/bash
+set -e  # 任何命令执行失败立即终止脚本
+
+# 强制覆盖式拉取最新代码
+git fetch origin "$GIT_BRANCH" >/dev/null 2>&1 || {
+    echo "❌ 获取远程分支失败"
+    exit 1
+}
+
+# 获取当前和远程的提交ID
+old_commit=$(git rev-parse HEAD)
+new_commit=$(git rev-parse origin/"$GIT_BRANCH")
+
+# 获取提交简要信息（版本摘要）
+old_version=$(git log -1 --pretty=format:"%h - %s" "$old_commit")
+new_version=$(git log -1 --pretty=format:"%h - %s" "$new_commit")
+
+
+# 对比并判断是否需要更新依赖
+if [ "$old_commit" != "$new_commit" ]; then 
+
+    git reset --hard "origin/$GIT_BRANCH" >/dev/null 2>&1 || {
+        echo "❌ 强制覆盖本地分支失败"
+        exit 1
+    }
+    
+    echo "✅ 更新到新版本：$new_version"
+    
+    # 安装依赖（静默模式，隐藏输出）
+    pip install -r requirements.txt \
+        -i http://mirrors.aliyun.com/pypi/simple/ \
+        --trusted-host=mirrors.aliyun.com \
+        --upgrade > /dev/null 2>&1 || {
+        echo "❌ 依赖安装失败"
+        exit 1
+    }  
+    echo "✅ 依赖安装成功"
+    echo "⏱️ 等待重启..." 
+    
+else
+    echo "✅ 当前已是最新版本：$old_version"
+    exit 1
+fi
