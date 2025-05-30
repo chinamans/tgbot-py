@@ -66,6 +66,50 @@ class Transform(Base):
     website: Mapped[str] = mapped_column(String(32))
     user_id: Mapped[int] = mapped_column(BigInteger)
     bonus: Mapped[float] = mapped_column(Numeric(16, 2))
+    @classmethod
+    async def add_transform_nouser(cls, user_id: int, website: str, bonus: float):
+        """
+        新增一条bonus记录
+
+        参数:
+            user_id (int): 用户ID
+            website (str): 站点名称
+            bonus (float): bonus数额
+        """
+        async with async_session_maker() as session, session.begin():
+            transform = cls(website=website, user_id=user_id, bonus=bonus)
+            session.add(transform)
+
+    @classmethod
+    async def get_latest_transform_createtime(cls, website: str, Direction: str="pay") -> datetime | None:
+        """
+        查询数据库中指定网站和操作类型的最新一条记录的创建时间
+
+        参数:Direction: str
+            website (str): 需要查询的站点标识。
+            bonus (float): 需要查询的操作类型。
+
+        返回:
+            tuple[datetime, Any] | None: 返回包含最新记录的创建时间
+            如果未找到记录则返回 None。
+        """
+        async with async_session_maker() as session, session.begin():
+            if Direction == "pay":
+                flag = Transform.bonus < 0               
+            else:
+                flag = Transform.bonus > 0 
+
+            stmt = (
+                select(cls.create_time)
+                .where(
+                    cls.website == website,
+                    flag,
+                )
+                .order_by(desc(cls.create_time))
+                .limit(1)
+            )
+            create_time = (await session.execute(stmt)).scalar_one_or_none()
+            return create_time
 
 
 class User(TimeBase):
@@ -82,6 +126,7 @@ class User(TimeBase):
             float: bonus 总和
         """
         async with async_session_maker() as session, session.begin():
+ 
             stmt = select(func.sum(Transform.bonus)).where(
                 Transform.user_id == self.user_id, Transform.website == site_name
             )
@@ -251,7 +296,6 @@ class User(TimeBase):
     ):
         """
         向表内写入一条打劫记录
-
         参数:
             website (str): 站点名称
             action (str): 行为（打劫/被打劫）

@@ -1,12 +1,15 @@
 import aiohttp
 import asyncio
 import time
-from config.config import MY_TGID, PT_GROUP_ID, ZHUQUE_COOKIE, ZHUQUE_X_CSRF
+from config.config import MY_TGID, PT_GROUP_ID
 from pyrogram import filters, Client
 from pyrogram.types import Message
 from libs import others
 from libs.log import logger
+from libs.state import state_manager
 from user_scripts.zhuque.getInfo_zhuque import getInfo
+
+SITE_NAME = "zhuque"
 
 PRIZES = {
     1: "改名卡",
@@ -19,13 +22,9 @@ PRIZES = {
 }
 BONUS_VALUES = {1: 300000, 2: 100000, 3: 80000, 4: 30000}
 API_URL = "https://zhuque.in/api/gaming/spinThePrizeWheel"
-HEADERS = {
-    "Cookie": ZHUQUE_COOKIE,
-    "X-Csrf-Token": ZHUQUE_X_CSRF,
-}
-
 
 async def spin_wheel(draws: int):
+
     stats = {
         "cost": 0,
         "bonus_back": 0,
@@ -47,9 +46,15 @@ async def spin_wheel(draws: int):
 
 
 async def fetch_batch(count, session: aiohttp.ClientSession, stats, lock):
+    cookie = state_manager.get_item(SITE_NAME.upper(),"cookie","")
+    xcsrf = state_manager.get_item(SITE_NAME.upper(),"xcsrf","")
+    headers = {
+        "Cookie": cookie,
+        "X-Csrf-Token": xcsrf,
+    }
     for _ in range(count):
         try:
-            async with session.post(API_URL, headers=HEADERS) as resp:
+            async with session.post(API_URL, headers=headers) as resp:
                 if resp.status != 200:
                     logger.warning(f"请求失败 status={resp.status}")
                     continue

@@ -70,6 +70,14 @@ BOT_COMMANDS: list[tuple[BotCommand, list[CommandScope]]] = [
         [CommandScope.PRIVATE_CHATS],
     ),
     (
+        BotCommand("cookie", "设定网页的cookie"),
+        [CommandScope.PRIVATE_CHATS],
+    ),
+    (
+        BotCommand("xcsrf", "设定网页的x-csrf"),
+        [CommandScope.PRIVATE_CHATS],
+    ),
+    (
         BotCommand("state", "查看当前状态参数"),
         [CommandScope.PRIVATE_CHATS],
     ),

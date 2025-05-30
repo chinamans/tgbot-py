@@ -6,10 +6,11 @@ from typing import Optional, Tuple
 from datetime import datetime, timedelta, date
 from models.redpocket_db_modle import Redpocket
 from schedulers import scheduler
+from libs.state import state_manager
 
 SITE_NAME = "zhuque"
 
-cookie_headers = {"Cookie": ZHUQUE_COOKIE, "X-Csrf-Token": ZHUQUE_X_CSRF}
+
 url = "https://zhuque.in/api/gaming/fireGenshinCharacterMagic"
 
 
@@ -17,11 +18,17 @@ async def fireGenshinCharacterMagic() -> Optional[Tuple[str, float]]:
     """
     调用朱雀 API 释放原神角色技能，返回 code 指令和奖励值 bonus。
     """
+    cookie = state_manager.get_item(SITE_NAME.upper(),"cookie","")
+    xcsrf = state_manager.get_item(SITE_NAME.upper(),"xcsrf","")
+    headers = {
+        "Cookie": cookie,
+        "X-Csrf-Token": xcsrf,
+    }
     async with aiohttp.ClientSession() as session:
         try:
             logger.info("开始自动朱雀释放")
             async with session.post(
-                url, headers=cookie_headers, json={"all": 1}
+                url, headers=headers, json={"all": 1}
             ) as response:
                 json_response = await response.json()
                 if response.status == 200 and json_response:

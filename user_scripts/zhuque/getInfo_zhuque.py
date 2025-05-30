@@ -1,18 +1,14 @@
 import aiohttp
 import asyncio
 import time
-from config.config import MY_TGID,PT_GROUP_ID,ZHUQUE_COOKIE, ZHUQUE_X_CSRF
+from config.config import MY_TGID,PT_GROUP_ID
 from pyrogram import filters, Client
 from pyrogram.types import Message
 from libs import others
 from libs.log import logger
+from libs.state import state_manager
 
-
-#  配置区，运行前填好配置
-cookie_headers = {
-    "Cookie": ZHUQUE_COOKIE,
-    "X-Csrf-Token": ZHUQUE_X_CSRF,
-}
+SITE_NAME = "zhuque"
 prizes3 = {
      "id": "UID",
      "username": "用户名",
@@ -29,9 +25,16 @@ url = "https://zhuque.in/api/user/getInfo?"
 
 async def getInfo():
     global retry_times
+    cookie = state_manager.get_item(SITE_NAME.upper(),"cookie","")
+    xcsrf = state_manager.get_item(SITE_NAME.upper(),"xcsrf","")
+    headers = {
+        "Cookie": cookie,
+        "X-Csrf-Token": xcsrf,
+    }
+
     try:
         async with aiohttp.ClientSession() as session:
-            async with session.get(url, headers=cookie_headers) as response:
+            async with session.get(url, headers=headers) as response:
                 if response.status == 200:
                     retry_times = 0
                     json_response = await response.json()
