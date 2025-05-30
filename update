@@ -7,7 +7,7 @@ git fetch origin "$GIT_BRANCH" >/dev/null 2>&1 || {
     exit 1
 }
 
-# 获取当前和远程的提交ID
+# 获取当前和远程的提交ID1
 old_commit=$(git rev-parse HEAD)
 new_commit=$(git rev-parse origin/"$GIT_BRANCH")
 
