@@ -10,7 +10,7 @@ from libs.state import state_manager
 async def zhuque_fanda_switch(client: Client, message: Message):
 
     """
-    自动反打开关监听
+    自动反打开关监听，
     用法：/fanda lose | win | all | off
     """
     if len(message.command) < 2:
