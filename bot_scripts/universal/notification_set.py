@@ -10,14 +10,15 @@ from libs.state import state_manager
 async def notification_switch(client: Client, message: Message):
     """
     控制调度任务的开关（如自动释放技能、自动更改昵称）。
-    用法: /leaderboard website on|off 或 /payleaderboard website on|off 或 /notification website on|off
+    用法: /leaderboard website|all on|off 或 /payleaderboard website|all on|off 或 /notification website|all on|off
     """
 
     if len(message.command) < 3:
         await message.reply(
             "❌ 参数不足。\n用法：\n"
-            "`/autofire website on|off`\n"
-            "`/autochangename website on|off`"
+            "/leaderboard website|all on|off"
+            "/payleaderboard website|all on|off"
+            "/notification website|all on|off"
         )
         return
 

@@ -15,6 +15,12 @@ async def help_message(client: Client, message: Message):
             "如果没有回复任何消息则查询自己的",
         ),
         (
+            "/re num",
+            "转发被回复的消息到当前群聊 转发num条",
+            "/re 10",
+            "转发10条 num可选不填默认1条",
+        ),
+        (
             "/dme num",
             "删除当前群组num条自己发消息",
             "/dme 10",
