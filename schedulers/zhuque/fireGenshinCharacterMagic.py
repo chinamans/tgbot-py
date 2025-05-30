@@ -1,7 +1,6 @@
 import aiohttp
 import asyncio
 from libs.log import logger
-from config.config import ZHUQUE_COOKIE, ZHUQUE_X_CSRF
 from typing import Optional, Tuple
 from datetime import datetime, timedelta, date
 from models.redpocket_db_modle import Redpocket
