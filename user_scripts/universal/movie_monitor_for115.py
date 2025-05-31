@@ -22,8 +22,8 @@ media_path = Path("temp_file/get_media")
 LINK_PATTERN = re.compile(r"https://115cdn\.com/s/[^\s]+")  # 匹配 115 链接
 TARGET = {
     
-    "CHANNEL_SHARES_115_ID":-1002188663986,
-    #"CHANNEL_SHARES_115_ID":-4200814739,
+    #"CHANNEL_SHARES_115_ID":-1002188663986,
+    "CHANNEL_SHARES_115_ID":-4200814739,
     "PAN115_SHARE_ID":-1002343015438,
     "GUAGUALE115_ID": -1002245898899
 }
@@ -285,6 +285,7 @@ async def monitor_channels(client: Client, message: Message):
     """监控频道消息，提取并转发 115 链接。"""
     
     shareswitch = state_manager.get_item(SITE_NAME.upper(),"shareswitch","off")
+    print(shareswitch)
     title = ""
     if shareswitch != "on":
         return
