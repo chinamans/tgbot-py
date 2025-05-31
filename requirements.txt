@@ -22,3 +22,4 @@ aiosqlite
 aiomysql
 pypinyin
 toml
+pygments
