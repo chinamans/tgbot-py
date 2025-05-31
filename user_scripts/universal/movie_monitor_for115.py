@@ -285,7 +285,7 @@ async def monitor_channels(client: Client, message: Message):
     """监控频道消息，提取并转发 115 链接。"""
     
     shareswitch = state_manager.get_item(SITE_NAME.upper(),"shareswitch","off")
-    logger.info(f"{shareswitch}")
+    
     title = ""
     if shareswitch != "on":
         return
