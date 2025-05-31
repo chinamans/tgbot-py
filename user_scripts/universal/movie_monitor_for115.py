@@ -22,8 +22,8 @@ media_path = Path("temp_file/get_media")
 LINK_PATTERN = re.compile(r"https://115cdn\.com/s/[^\s]+")  # 匹配 115 链接
 TARGET = {
     
-    #"CHANNEL_SHARES_115_ID":-1002188663986,
-    "CHANNEL_SHARES_115_ID":-4200814739,
+    "CHANNEL_SHARES_115_ID":-1002188663986,
+    "TEST_CHAT_ID":-4200814739,
     "PAN115_SHARE_ID":-1002343015438,
     "GUAGUALE115_ID": -1002245898899
 }
@@ -294,14 +294,15 @@ async def monitor_channels(client: Client, message: Message):
 
  
     if (message.chat.id == TARGET["CHANNEL_SHARES_115_ID"]
-        or message.chat.id == TARGET["GUAGUALE115_ID"]):
+        or message.chat.id == TARGET["GUAGUALE115_ID"]
+        or message.chat.id == TARGET["TEST_CHAT_ID"]):
         match = None
         caption = message.caption or "" 
         match = re.search(r"(.*?)\s*\((\d+)\)", caption)         
         if match:
             title = match.group(1).strip()  # 括号前的内容
             year = match.group(2).strip() 
-            if "EP" not in caption and "全" in caption:
+            if ("EP" not in caption and "全" in caption) or "完结" in caption:
                 complete_series = True
             else:
                 complete_series = False
