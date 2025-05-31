@@ -86,7 +86,7 @@ BOT_COMMANDS: list[tuple[BotCommand, list[CommandScope]]] = [
         [CommandScope.PRIVATE_CHATS],
     ),
     (
-        BotCommand("share115tocms", "share115tocms不检索关键字设定"),
+        BotCommand("share115tocms", "share115tocms 启用开关"),
         [CommandScope.PRIVATE_CHATS],
     ),    
     (
