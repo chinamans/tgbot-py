@@ -92,11 +92,16 @@ async def generate_command_table_image(data, title="📘 命令一览表"):
     with open(html_file, "w", encoding="utf-8") as f:
         f.write(html_str)
 
-    imgkit.from_file(str(html_file), str(img_file), config=wkhtml_config, options={
-        'encoding': 'UTF-8',
+        
+    options = {
+        'encoding': "UTF-8",
         'format': 'png',
         'width': 800,
-        'enable-local-file-access': ''
-    })
+        'enable-local-file-access': '',
+        'quiet': ''
+    }
+
+    imgkit.from_file(str(html_file), str(img_file), options=options, config=wkhtml_config)
+
     Path(html_file).unlink()    
     return img_file
