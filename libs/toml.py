@@ -1,10 +1,7 @@
 import os
-import toml
-import tomllib
-import os
-import toml
-import tomllib
-from copy import deepcopy
+import tomllib  
+import toml     
+from typing import Dict
 
 
 def toml_read_state(file_path) -> dict:
@@ -31,30 +28,28 @@ def deep_merge(dict1: dict, dict2: dict) -> dict:
 
 def toml_write_state(data: dict, file_path) -> None:
     """
-    安全写入整个状态字典。保留原文件未变的结构，进行合并。
-    通常配合 StateManager 使用。
+    安全写入整个状态字典，保留原结构，合并后以 UTF-8 编码写入。
     """
-    # 读取已有内容
     if os.path.exists(file_path):
         with open(file_path, "rb") as f:
             original = tomllib.load(f)
     else:
         original = {}
 
-    # 合并新旧内容
     merged = deep_merge(original, data)
 
-    # 写入文件
-    with open(file_path, "w") as f:
+    # ✅ 强制写入为 UTF-8，防止下次读取报错
+    with open(file_path, "w", encoding="utf-8") as f:
         toml.dump(merged, f)
 
 
 def toml_write_section(section: str, section_data: dict, file_path) -> None:
     """
     单独写入指定 section 表头的数据，保留其它表头内容。
-    比如：写入 [user] 或 [settings]。
     """
     full_data = toml_read_state(file_path)
     full_data[section] = deep_merge(full_data.get(section, {}), section_data)
-    with open(file_path, "w") as f:
+
+    # ✅ 强制写入为 UTF-8
+    with open(file_path, "w", encoding="utf-8") as f:
         toml.dump(full_data, f)

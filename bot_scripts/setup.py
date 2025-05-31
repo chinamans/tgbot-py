@@ -78,6 +78,18 @@ BOT_COMMANDS: list[tuple[BotCommand, list[CommandScope]]] = [
         [CommandScope.PRIVATE_CHATS],
     ),
     (
+        BotCommand("set115tocms", "share115tocms所需的配置设定如embyapi"),
+        [CommandScope.PRIVATE_CHATS],
+    ),
+    (
+        BotCommand("blockyword", "share115tocms不检索关键字设定"),
+        [CommandScope.PRIVATE_CHATS],
+    ),
+    (
+        BotCommand("share115tocms", "share115tocms不检索关键字设定"),
+        [CommandScope.PRIVATE_CHATS],
+    ),    
+    (
         BotCommand("state", "查看当前状态参数"),
         [CommandScope.PRIVATE_CHATS],
     ),

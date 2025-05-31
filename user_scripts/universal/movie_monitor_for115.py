@@ -10,16 +10,15 @@ from aiohttp import ClientTimeout
 from typing import List, Optional
 from pyrogram import filters, Client
 from pyrogram.types.messages_and_media import Message
-from config.config import M115_GROUP_ID, ADMIN_ID, EMBY_API_KEY, EMBY_SERVER,TMDB_API_KEY,proxy_set
+from libs.state import state_manager
+from app import get_bot_app
+from config.config import proxy_set,PT_GROUP_ID
 
+SITE_NAME = "SHARE115TOCMS"
 
 media_path = Path("temp_file/get_media")
-blockyword_path = Path("db_file/dbflag/blockyword.json")
-blockyword_path.parent.mkdir(parents=True, exist_ok=True)  
 
 
-monitor_enabled = False
-otherchat_trans = False
 LINK_PATTERN = re.compile(r"https://115cdn\.com/s/[^\s]+")  # 匹配 115 链接
 TARGET = {
     
@@ -34,7 +33,8 @@ class TmdbApi:
     TMDB识别匹配（异步版）
     """
     def __init__(self):
-        self.api_key = TMDB_API_KEY
+        tmdbapi = state_manager.get_item(SITE_NAME.upper(),"tmdbapi","")
+        self.api_key = tmdbapi
         self.language = 'zh'
         self.base_url = 'https://api.themoviedb.org/3'
         self.proxy = proxy_set['PROXY_URL']  # 可以是 socks5 或 http 代理
@@ -146,6 +146,9 @@ async def get_movies(title: str, year: Optional[str] = None, media_type: Optiona
     :param apikey: API 密钥
     :return: 含title、year属性的字典列表
     """ 
+    embyserver = state_manager.get_item(SITE_NAME.upper(),"embyserver","")
+    embyapi = state_manager.get_item(SITE_NAME.upper(),"embyapi","")
+
     if media_type.lower() == "movie":
         media_type = "media_type"
     elif media_type.lower == "tv":
@@ -153,7 +156,7 @@ async def get_movies(title: str, year: Optional[str] = None, media_type: Optiona
     else:
         media_type = None
 
-    url = f"{EMBY_SERVER}emby/Items"
+    url = f"{embyserver}emby/Items"
     params = {
         "IncludeItemTypes": f"{media_type}",
         "Fields": "ProviderIds,OriginalTitle,ProductionYear,Path,UserDataPlayCount,UserDataLastPlayedDate,ParentId",
@@ -162,7 +165,7 @@ async def get_movies(title: str, year: Optional[str] = None, media_type: Optiona
         "SearchTerm": title,
         "Limit": 10,
         "IncludeSearchTypes": "false",
-        "api_key": EMBY_API_KEY
+        "api_key": embyapi
     }
 
     try:
@@ -201,14 +204,14 @@ async def send_115_links(client:Client, message, title, year):
     """
     提取并发送 115 链接
     """
+    cmsbot = state_manager.get_item(SITE_NAME.upper(),"cmsbot","")
     links = await extract_115_links(message)
     if links:
         for link in links:
-            await client.send_message(M115_GROUP_ID['CMS_BOT_ID'], link)
+            await client.send_message(cmsbot, link)
             logger.info(f"已发送媒体: [标题: {title}, 年份: {year}] 链接: {link}")
     else:
-        logger.warning("未找到 115 链接。")
-        
+        logger.warning("未找到 115 链接。")        
 
 async def search_and_send_message(client: Client, title, year, complete_series, message):
     if not title:
@@ -234,11 +237,7 @@ async def search_and_send_message(client: Client, title, year, complete_series, 
              if item.get("title") == title or item.get("name") == title),
             0
         )
-    )
-            
-
-
-
+    )  
 
     # 提取 TMDB 结果
     media = results[result_index]
@@ -283,15 +282,13 @@ async def search_and_send_message(client: Client, title, year, complete_series, 
     )
 async def monitor_channels(client: Client, message: Message):
     """监控频道消息，提取并转发 115 链接。"""
-    global monitor_enabled
+    
+    shareswitch = state_manager.get_item(SITE_NAME.upper(),"shareswitch","off")
     title = ""
-    if not monitor_enabled:
+    if shareswitch != "on":
         return
-    if os.path.exists(blockyword_path):
-        with open(blockyword_path, "r", encoding="utf-8") as f:
-            blockyword_list = json.load(f)
-    else:
-        blockyword_list = [] 
+    
+    blockyword_list = state_manager.get_item(SITE_NAME.upper(),"blockyword_list",[])
 
  
     if (message.chat.id == TARGET["CHANNEL_SHARES_115_ID"]
@@ -349,122 +346,13 @@ async def monitor_channels(client: Client, message: Message):
 
 
 
-# ================== 开关命令处理 ==================
-@Client.on_message(
-        filters.me 
-        & (filters.command("dyjk")
-           | filters.command("dyzf")
-        )           
-    )
-async def toggle_monitor(client: Client, message: Message):
-    """切换监控功能或转发功能状态"""
-    global monitor_enabled, otherchat_trans
-    if len(message.command) < 2:
-        await message.reply("参数不足。用法：`/dyjk on|off` 或 `/dyzf on|off`")
-        return
-    cmd_name = message.command[0].lower()
-    action = message.command[1].lower()
-
-    if action not in ("on", "off"):
-        await message.reply("无效参数。请使用 `on` 或 `off`")
-        return
-    enable = (action == "on")
-    status = "启动" if enable else "停止"
-
-    if cmd_name == "dyjk":
-        monitor_enabled = enable
-        re_mess = await message.edit(f"✅ 监控功能已{status}！")
-    elif cmd_name == "dyzf":
-        otherchat_trans = enable
-        re_mess = await message.edit(f"🔄 转发功能已{status}！")
-    else:
-        re_mess = await message.edit("无效命令。支持 `/dyjk` 或 `/dyzf`。")
-    if re_mess:
-        await others.delete_message(re_mess,8)
-
-
-# ================== 添加、删除屏蔽关键字 ==================
-@Client.on_message(
-        filters.me 
-        & filters.command("blockyword")
-    )
-
-async def blockyword_add_remove(client: Client, message: Message):
-    """115电影删选屏蔽词增加或删除"""  
-
-    if len(message.command) < 3:
-        await message.reply("参数不足。用法：`/blockyword add xxx` 或 `/blockyword remove xxx` ")
-        return
-    cmd_name = message.command[0].lower()
-    action = message.command[1].lower()
-    words = message.command[2].lower()   
-    
-    if os.path.exists(blockyword_path):
-        with open(blockyword_path, "r", encoding="utf-8") as f:
-            blockyword_list = json.load(f)
-    else:
-        blockyword_list = []
-    
-    if action in "add" or "remove":
-        if action == "add":        
-            if words not in blockyword_list:
-                blockyword_list.append(words)
-        elif action == "remove":
-            if words in blockyword_list:
-                blockyword_list.remove(words)        
-        try:
-            with open(blockyword_path, "w", encoding="utf-8") as f:
-                json.dump(blockyword_list, f, ensure_ascii=False, indent=4)
-        except Exception as e:
-            logger.error(f"屏蔽次增加或删除失败 {str(e)}")
-            return
-        
-        re_mess=await message.edit(f'屏蔽词{words}{action}成功\n当前当前屏蔽词以下：{blockyword_list}')
-    else:
-        await message.reply("无效参数。请使用 `add` 或 `remove`")
-   
-    if re_mess:
-        await others.delete_message(re_mess,15)
-
-
-
-
-@Client.on_message(
-        filters.private 
-        & filters.user(M115_GROUP_ID['CMS_BOT_ID'])
-    )
-async def forward_to_group(client:Client, message: Message):
-    """
-    CMS_BOT message 转发 给个人CMS群组
-    """
-    global otherchat_trans
-    if otherchat_trans:
-        await message.copy(M115_GROUP_ID['CMS_TRANS_CHAT'])
-        logger.info(f"成功将CMS_BOT的消息转发给个人CMS群组")
-
-
-@Client.on_message(
-        filters.chat(M115_GROUP_ID['CMS_TRANS_CHAT'])
-        & filters.user(ADMIN_ID)
-    )
-
-async def forward_to_CMS_bot(client:Client, message: Message):
-    """
-    个人CMS群组的特定人员消息转发至CMS_BOT
-    """
-    global otherchat_trans
-    if otherchat_trans:
-        await message.copy(M115_GROUP_ID['CMS_BOT_ID'])
-        logger.info(f"成功将群组消息转发给CMS_BOT")
-
-
-
-
 # ================== 手动查询媒体信息 ==================
 @Client.on_message(
     filters.me & filters.command("getmedia")
 )
 async def getmedia(client: Client, message: Message):
+    
+    bot_app = get_bot_app()
     media_path.mkdir(parents=True, exist_ok=True)
 
     args = message.command[1:]
@@ -482,6 +370,6 @@ async def getmedia(client: Client, message: Message):
     with open(file_path, "w", encoding="utf-8") as f:
         f.write(json.dumps(result_mess, ensure_ascii=False, indent=4))
 
-    await client.send_document(M115_GROUP_ID['MESSAGE_TRASN_CHAT'], file_path)
+    await bot_app.send_document(PT_GROUP_ID["BOT_MESSAGE_CHAT"], file_path)
     shutil.rmtree(media_path, ignore_errors=True)
     await message.delete()
