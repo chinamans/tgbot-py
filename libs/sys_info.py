@@ -8,7 +8,7 @@ from pathlib import Path
 pyproject_path = Path(__file__).resolve().parent.parent / "pyproject.toml"
 
 async def system_version_get():
-    container_name = os.getenv("CONTAINER_NAME", "")
+    container_name = os.getenv("HOST_NAME", "")
     sys_info = platform.uname()
     hostname = container_name or sys_info.node
     kernel_version = platform.uname().release
