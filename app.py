@@ -45,7 +45,7 @@ async def start_app():
         plugins=dict(root="bot_scripts"),
     )
 
-    project_name, re_mess = await system_version_get()
+    project_name, tgbot_sate = await system_version_get()
     logger.info(f"开始尝试启动 {project_name} 监听程序")
 
     try:
@@ -99,7 +99,8 @@ async def start_app():
     logger.info(f"{project_name} 监听程序启动成功")
 
     # 发送版本信息
-    await bot_app.send_message(PT_GROUP_ID["BOT_MESSAGE_CHAT"], re_mess)
+    re_msg = f"您的{project_name} 项目已登录 状态如下:\n\n" + tgbot_sate
+    await bot_app.send_message(PT_GROUP_ID["BOT_MESSAGE_CHAT"], re_msg)
     await idle()  # 等待直到退出
     logger.info(f"开始关闭 {project_name} 监听程序...")
     await async_engine.dispose()

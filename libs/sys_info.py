@@ -2,21 +2,29 @@ import os
 import sys
 import platform
 import pyrogram
-import tomllib  # Python 3.11+，老版本用 toml 库
+import tomllib  
 from pathlib import Path
 
-
-def get_project_name():
-    pyproject_path = Path(__file__).resolve().parent.parent / "pyproject.toml"
-    with open(pyproject_path, "rb") as f:
-        data = tomllib.load(f)
-    return data["project"]["name"]
-
+pyproject_path = Path(__file__).resolve().parent.parent / "pyproject.toml"
 
 async def system_version_get():
+    container_name = os.getenv("CONTAINER_NAME", "")
     sys_info = platform.uname()
-    project_name = get_project_name()
-    python_info = f"Python: {sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}"
-    pyrogram_info = f"脚本依赖: pyrogram: {pyrogram.__version__}" 
-    re_message = f"您的`{project_name}`项目在`{sys_info.node}`的`{sys_info.system}`设备上登录 \n{python_info} {pyrogram_info}"
-    return project_name, re_message
+    hostname = container_name or sys_info.node
+    kernel_version = platform.uname().release
+    
+    with open(pyproject_path, "rb") as f:
+        data = tomllib.load(f)
+    project_name = data["project"]["name"] or "unkown"
+
+    python_info = f"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}"
+    pyrogram_info = f"{pyrogram.__version__}" 
+    tgbot_sate = (
+        f"**{project_name} 项目运行状态:\n**"
+        f"主机名: {hostname}\n"
+        f"主机平台: {sys_info.system}\n"
+        f"kernel 版本: {kernel_version}\n"
+        f"Python 版本: {python_info}\n"
+        f"Pyrogram 版本: {pyrogram_info}\n"
+    )
+    return project_name, tgbot_sate

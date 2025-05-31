@@ -90,7 +90,11 @@ BOT_COMMANDS: list[tuple[BotCommand, list[CommandScope]]] = [
         [CommandScope.PRIVATE_CHATS],
     ),    
     (
-        BotCommand("state", "查看当前状态参数"),
+        BotCommand("configstate", "查看当前参数状态"),
+        [CommandScope.PRIVATE_CHATS],
+    ),
+    (
+        BotCommand("sysstate", "查看当前登录状态"),
         [CommandScope.PRIVATE_CHATS],
     ),
     (

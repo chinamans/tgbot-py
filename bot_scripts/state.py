@@ -7,8 +7,15 @@ from libs.toml_images import toml_file_to_image
 
 
 # 监听来自指定TG用户的 /state 命令
-@Client.on_message(filters.chat(MY_TGID) & filters.command("state"))
-async def state(client: Client, message: Message):
+@Client.on_message(filters.chat(MY_TGID) & filters.command("configstate"))
+async def configstate(client: Client, message: Message):
+    image = await toml_file_to_image("config/state.toml")
+    await message.reply_photo(image)
+    Path(image).unlink() 
+
+# 监听来自指定TG用户的 /state 命令
+@Client.on_message(filters.chat(MY_TGID) & filters.command("sysstate"))
+async def sysstate(client: Client, message: Message):
     image = await toml_file_to_image("config/state.toml")
     await message.reply_photo(image)
     Path(image).unlink() 
