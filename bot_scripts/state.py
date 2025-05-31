@@ -4,6 +4,8 @@ from pyrogram.types import Message
 from config.config import MY_TGID
 from libs.state import state_manager
 from libs.toml_images import toml_file_to_image
+from libs.sys_info import system_version_get
+
 
 
 # 监听来自指定TG用户的 /state 命令
@@ -16,6 +18,6 @@ async def configstate(client: Client, message: Message):
 # 监听来自指定TG用户的 /state 命令
 @Client.on_message(filters.chat(MY_TGID) & filters.command("sysstate"))
 async def sysstate(client: Client, message: Message):
-    image = await toml_file_to_image("config/state.toml")
-    await message.reply_photo(image)
-    Path(image).unlink() 
+    project_name, tgbot_sate = await system_version_get()
+    await message.reply(tgbot_sate)
+    
