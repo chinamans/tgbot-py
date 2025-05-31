@@ -8,30 +8,6 @@ NY_USERNAME = 'ssssss'   # tg 用户名
 MY_TGID = 123344 # 自己的telegram id
 
 
-############## movie_monitor_for115配置(将115分享群的电影进行TMDb检索并emby查询是否含有) #################
-
-ADMIN_ID = [
-    1111111111,
-    1111111111,
-    1111111111
-]   
-# ADMIN 这是我为CMSbot建了一个群，然后将群里的消息转发给CMSbot，将CMSbot的小转发到这个群里
-# 这里ADMIN_ID里面设定的ID成员所发的消息 会被转发到CMSbot
-
-M115_GROUP_ID = {
-    "CMS_BOT_ID":111111,  #CMS的BOT的 ID（不是API_tokn）
-    "CMS_TRANS_CHAT":-1111111  #这就是上文说的自己建立的CMSbot的群 如果不用转发则随意写
-}
-
-EMBY_API_KEY = "11111111111111"  # EMBY 的 API 密钥 用于检索enby
-EMBY_SERVER = "http://192.168.1.1:8096/"  # EMBY 服务器地址
-TMDB_API_KEY = "1111111111111111"  # TMDB 的 API 密钥
-
-
-#####################朱雀Cookie##############################
-
-ZHUQUE_COOKIE = "sssss"
-ZHUQUE_X_CSRF = "xxxxxxxd"
 
 ########################运行代理配置########################
 
