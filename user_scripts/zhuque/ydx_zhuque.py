@@ -258,11 +258,13 @@ async def zhuque_ydx_new_round(client: Client, message: Message):
 
 
 #下注模式后续搞成Class
-async def zhuque_ydx_models(start_count, stop_bet_count, start_bonus, result_ydx, message: Message, model="a"): 
+async def zhuque_ydx_models(start_count, stop_count, start_bonus, result_ydx, message: Message, model="a"): 
     
     if not result_ydx:
         return
     lottery_result, consecutive_count, bet_count, win_amount = result_ydx
+    consecutive_count = int(consecutive_count)
+    bet_count = int(bet_count)
 
     if model.lower() == 'a':
         opposite_map = {"Big": "s", "Small": "b"}
@@ -271,8 +273,8 @@ async def zhuque_ydx_models(start_count, stop_bet_count, start_bonus, result_ydx
         # 开始下注逻辑
         should_bet = (
             consecutive_count >= start_count and
-            consecutive_count <= start_count + stop_bet_count and
-            bet_count < stop_bet_count and        
+            consecutive_count <= (start_count + stop_bet_count) and
+            bet_count < stop_count and        
             bet_side is not None
         )
         if should_bet:
