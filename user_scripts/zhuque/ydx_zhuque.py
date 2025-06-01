@@ -273,7 +273,7 @@ async def zhuque_ydx_models(start_count, stop_count, start_bonus, result_ydx, me
         # 开始下注逻辑
         should_bet = (
             consecutive_count >= start_count and
-            consecutive_count <= (start_count + stop_bet_count) and
+            consecutive_count <= (start_count + stop_count) and
             bet_count < stop_count and        
             bet_side is not None
         )
