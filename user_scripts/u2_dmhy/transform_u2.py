@@ -142,6 +142,6 @@ async def u2_dmhy_transform_pay(client: Client, message: Message):
             reply = await message.edit(f"```\n🎉 成功赠与 {username} 大佬 {bonus} {BONUS_NAME}```")
         else:
             reply = await message.edit(f"```\n❌ 赠与 {username} 的 {bonus} {BONUS_NAME} 失败\n原因: {detail}```")
-        await others.delete_message(reply, 20)
+        await others.delete_message(reply, 90)
 
 
