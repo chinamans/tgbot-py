@@ -82,7 +82,7 @@ async def u2_dmhy_transform_pay(client: Client, message: Message):
         seconds_to_sleep = max(next_time.total_seconds() + 2, 0)
     else:
         seconds_to_sleep = 300
-    print("last_time",last_time,"next_time",next_time,"seconds_to_sleep",seconds_to_sleep )
+    
 
     if command_name == "u2s":
         # 多人批量送糖
