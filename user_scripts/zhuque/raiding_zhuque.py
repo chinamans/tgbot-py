@@ -98,7 +98,7 @@ async def zhuque_dajie_fanda(raidcount: int, message: Message):
     自动反打程序
     """
     
-    auto_fanda_switch = state_manager.get_item("ZHUQUE","fanda",0)
+    auto_fanda_switch = state_manager.get_item("ZHUQUE","fanda","off")
     raiding_msg = message.reply_to_message
     win_amt = extract_lingshi_amount(
         message.text, r"(亏损|你被反打劫) ([\d\.]+) 灵石\s*$"

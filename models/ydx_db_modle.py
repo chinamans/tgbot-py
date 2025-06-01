@@ -22,7 +22,9 @@ class Zhuqueydx(Base):
     website: Mapped[str] = mapped_column(String(32))
     die_point: Mapped[int] = mapped_column(Integer)
     lottery_result: Mapped[str] = mapped_column(String(32))
-    high_count: Mapped[int] = mapped_column(Integer)
+    consecutive_count: Mapped[int] = mapped_column(Integer)       
+    bet_side: Mapped[str] = mapped_column(String(32))
+    bet_count: Mapped[int] = mapped_column(Integer)
     bet_amount: Mapped[float] = mapped_column(Numeric(16, 2))
     win_amount: Mapped[float] = mapped_column(Numeric(16, 2))
 
@@ -32,7 +34,9 @@ class Zhuqueydx(Base):
         website: str,
         die_point: int,
         lottery_result: str,
-        high_count: int,
+        consecutive_count: int,
+        bet_side: str,
+        bet_count: int,
         bet_amount: float,
         win_amount: float,
     ):
@@ -43,7 +47,8 @@ class Zhuqueydx(Base):
             website (str): 网站名称
             die_point (int): 死点
             lottery_result (str): 开奖结果
-            high_count (int): 高点数
+            consecutive_side (str): 连续方向
+            consecutive_count (int): 连续次数
             bet_amount (float): 投注金额
             win_amount (float): 中奖金额
 
@@ -54,9 +59,11 @@ class Zhuqueydx(Base):
             redpocket = cls(
                 website=website,
                 die_point=die_point,
-                lottery_result=lottery_result,
-                high_count=high_count,
+                lottery_result=lottery_result, 
+                consecutive_count=consecutive_count,
+                bet_side=bet_side,
+                bet_count=bet_count,
                 bet_amount=bet_amount,
-                win_amount=win_amount,
+                win_amount=win_amount
             )
             session.add(redpocket)
