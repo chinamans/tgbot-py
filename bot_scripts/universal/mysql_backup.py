@@ -17,7 +17,7 @@ BACKUP_DIR = Path("db_file/mysqlBackup")
 RETENTION_DAYS = 8  # 备份保留天数
 
 
-@scheduler.scheduled_job("cron",hour=13, minute=30, id="mysql_backup")
+@scheduler.scheduled_job("cron", hour=6, minute=6, second=6, id="mysql_backup")
 async def mysql_backup():
     bot_app = get_bot_app()
     """
