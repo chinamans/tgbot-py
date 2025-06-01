@@ -1,8 +1,14 @@
+# 标准库
 import subprocess
+
+# 第三方库
 from pyrogram import filters, Client
 from pyrogram.types import Message
+
+# 自定义模块
 from config.config import MY_TGID
 from libs.log import logger
+
 
 
 # 监听来自指定TG用户的 /update 命令

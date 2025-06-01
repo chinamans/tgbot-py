@@ -1,7 +1,13 @@
+# 标准库
 import asyncio
-import aiomysql
-from config.config import DB_INFO
 from urllib.parse import quote_plus
+
+# 第三方库
+import aiomysql
+
+# 自定义模块
+from config.config import DB_INFO
+
 
 
 # 数据库连接配置

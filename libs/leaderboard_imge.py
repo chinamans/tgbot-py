@@ -1,9 +1,14 @@
+# 标准库
 import os
-import imgkit
-import asyncio
-from pathlib import Path
-from config import config
 import uuid
+from pathlib import Path
+
+# 第三方库
+import imgkit
+
+# 自定义模块
+from config import config
+
 
 medal_emojis = {
     1: "🥇",

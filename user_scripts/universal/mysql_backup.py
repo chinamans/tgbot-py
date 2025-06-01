@@ -1,14 +1,16 @@
+# 标准库
 import os
 import gzip
 import shutil
 import subprocess
 from pathlib import Path
-from app import scheduler,get_user_app,get_bot_app
-from libs.log import logger
 from datetime import datetime
-from pyrogram import Client
-from pyrogram.types import Message
-from config.config import DB_INFO,PT_GROUP_ID
+
+# 自定义模块
+from app import scheduler, get_bot_app
+from config.config import DB_INFO, PT_GROUP_ID
+from libs.log import logger
+
 
 # === 配置部分 ===
 BACKUP_DIR = Path("db_file/mysqlBackup")
@@ -17,7 +19,6 @@ RETENTION_DAYS = 8  # 备份保留天数
 
 @scheduler.scheduled_job("cron",hour=6, minute=6, id="mysql_backup")
 async def mysql_backup():
-    user_app = get_user_app()
     bot_app = get_bot_app()
     """
     自动mysql备份

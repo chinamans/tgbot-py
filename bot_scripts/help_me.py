@@ -1,8 +1,14 @@
+# 标准库
 from pathlib import Path
-from pyrogram.types import Message
+
+# 第三方库
 from pyrogram import filters, Client
+from pyrogram.types import Message
+
+# 自定义模块
 from config.config import MY_TGID
 from libs.command_tablepy import generate_command_table_image
+
 
 
 @Client.on_message(filters.chat(MY_TGID) & filters.command("helpme"))

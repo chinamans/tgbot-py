@@ -1,11 +1,15 @@
+# 标准库
 import asyncio
 import subprocess
 from pathlib import Path
-from libs.log import logger
+
+# 第三方库
 from pyrogram import Client
-from config.config import PT_GROUP_ID
+
+# 自定义模块
 from app import system_version_get
-from config.config import API_HASH, API_ID, BOT_TOKEN, proxy_set
+from config.config import API_HASH, API_ID, BOT_TOKEN, PT_GROUP_ID, proxy_set
+from libs.log import logger
 
 
 if proxy_set["proxy_enable"] == True:

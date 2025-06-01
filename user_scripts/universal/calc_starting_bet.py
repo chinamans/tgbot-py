@@ -1,6 +1,9 @@
-from libs import others
+# 第三方库
 from pyrogram import filters, Client
 from pyrogram.types.messages_and_media import Message
+
+# 自定义模块
+from libs import others
 
 
 def calc_starting_bet(c=50000000, max_n=20):

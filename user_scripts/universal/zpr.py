@@ -1,12 +1,18 @@
+# 标准库
 import shutil
 import contextlib
 from pathlib import Path
-from libs.log import logger
+
+# 第三方库
 from httpx import AsyncClient
 from pyrogram import filters, Client
-from pyrogram.types.messages_and_media import Message
-from pyrogram.types import InputMediaPhoto,InputMediaDocument
+from pyrogram.types import Message
+from pyrogram.types import InputMediaPhoto, InputMediaDocument
 from pyrogram.errors import RPCError
+
+# 自定义模块
+from libs.log import logger
+
 
 
 

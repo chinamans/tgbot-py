@@ -1,9 +1,15 @@
+# 标准库
 import asyncio
-from libs.log import logger
 from random import randint
+
+# 第三方库
 from pyrogram import filters, Client
 from pyrogram.types import Message
+
+# 自定义模块
 from filters import custom_filters
+from libs.log import logger
+
 
 
 TARGET = [-1001788987573, -1001873711923]

@@ -1,15 +1,14 @@
 """ Module to automate message deletion. """
-
+# 标准库
 import traceback
 import random
-from libs.log import logger
-from libs import others
-from emoji import emojize
-from libs.state import state_manager
-from pyrogram import filters, Client
-from pyrogram.types import Message
 from datetime import datetime, timedelta, timezone
+
+# 自定义模块
+from libs.log import logger
+from libs.state import state_manager
 from schedulers import scheduler
+
 
 
 

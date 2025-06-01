@@ -1,9 +1,15 @@
+# 标准库
 import asyncio
-from libs.log import logger
-from pyrogram.types import Message
-from pyrogram import filters, Client
-from pyrogram.errors import PeerIdInvalid
 from datetime import datetime, time, timedelta
+
+# 第三方库
+from pyrogram import filters, Client
+from pyrogram.types import Message
+from pyrogram.errors import PeerIdInvalid
+
+# 自定义模块
+from libs.log import logger
+
 
 
 async def delete_message(message_del: Message, sleep_time: float = 35) -> asyncio.Task:

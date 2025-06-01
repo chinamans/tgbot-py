@@ -1,12 +1,17 @@
+# 标准库
 import os
 from pathlib import Path
+
+# 第三方库
+from pyrogram.types import Message
+
+# 自定义模块
 from config import config
 from libs import others
 from libs.log import logger
-from models import async_session_maker
-from models.transform_db_modle import User
-from pyrogram.types import Message
 from libs.leaderboard_imge import get_leaderboard
+from models.transform_db_modle import User
+
 
 
 def build_message(user: User, bonus, bonus_name, sumcount, sumbonus, user_ranking, direction):

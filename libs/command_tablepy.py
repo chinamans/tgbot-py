@@ -1,7 +1,11 @@
+# 标准库
 import os
-import imgkit
 import uuid
 from pathlib import Path
+
+# 第三方库
+import imgkit
+
 
 async def generate_command_table_image(data, title="📘 命令一览表"):
     # wkhtmltoimage 路径（根据系统设置）

@@ -1,7 +1,9 @@
-
+# 标准库
 import urllib.parse
+
+# 第三方库
 from pyrogram import filters, Client
-from pyrogram.types.messages_and_media import Message
+from pyrogram.types import Message
 
 
 ju_pai_api = "https://api.txqq.pro/api/zt.php"

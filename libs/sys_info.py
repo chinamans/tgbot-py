@@ -1,9 +1,13 @@
+# 标准库
 import os
 import sys
 import platform
-import pyrogram
-import tomllib  
+import tomllib
 from pathlib import Path
+
+# 第三方库
+import pyrogram
+
 
 pyproject_path = Path(__file__).resolve().parent.parent / "pyproject.toml"
 

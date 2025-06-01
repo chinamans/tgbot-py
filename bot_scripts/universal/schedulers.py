@@ -1,11 +1,12 @@
-
+# 第三方库
 from pyrogram import filters, Client
 from pyrogram.types import Message
 
+# 自定义模块
 from config.config import MY_TGID
 from libs.state import state_manager
 from schedulers import scheduler, scheduler_jobs
-from schedulers import zhuque_autofire_firsttimeget,auto_changename_temp
+
 
 
 @Client.on_message(filters.chat(MY_TGID) & filters.command("scheduler_jobs"))

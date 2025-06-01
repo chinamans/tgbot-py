@@ -1,16 +1,25 @@
-
+# 标准库
 import re
 import asyncio
-from libs.log import logger
-from app import get_bot_app
-from libs.state import state_manager
-from random import randint,random
+from random import randint, random
 from datetime import datetime, time
-from filters import custom_filters
-from pyrogram.types  import Message
+
+# 第三方库
 from pyrogram import filters, Client
-from config.config import PT_GROUP_ID,MY_TGID,LOTTERY_TARGET_GROUP,PRIZE_LIST
-from config.reply_message import NO_AOUTOLOTTERY_REPLY_MESSAGE,LOTTERY_Sticker_REPLY_MESSAGE,LOTTERY_LOSE_REPLY_MESSAGE
+from pyrogram.types import Message
+
+# 自定义模块
+from app import get_bot_app
+from config.config import PT_GROUP_ID, MY_TGID, LOTTERY_TARGET_GROUP, PRIZE_LIST
+from config.reply_message import (
+    NO_AOUTOLOTTERY_REPLY_MESSAGE,
+    LOTTERY_Sticker_REPLY_MESSAGE,
+    LOTTERY_LOSE_REPLY_MESSAGE,
+)
+from filters import custom_filters
+from libs.log import logger
+from libs.state import state_manager
+
 
 
 

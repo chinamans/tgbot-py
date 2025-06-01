@@ -1,10 +1,14 @@
+# 标准库
 import io
 import sys
-import pytz
 import logging
 from pathlib import Path
 from datetime import datetime
 from logging.handlers import RotatingFileHandler
+
+# 第三方库
+import pytz
+
 
 
 # 可选：东八区时间格式

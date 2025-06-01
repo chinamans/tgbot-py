@@ -1,9 +1,12 @@
+# 标准库
 import os
 import uuid
 from pathlib import Path
+
+# 第三方库
 import imgkit
 from pygments import highlight
-from pygments.lexers.configs import IniLexer  # 或者 TomlLexer
+from pygments.lexers.configs import IniLexer
 from pygments.formatters import HtmlFormatter
 
 async def toml_file_to_image(toml_file_path: Path):

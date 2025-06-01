@@ -1,18 +1,22 @@
+# 标准库
 import re
-import os
 import json
 import shutil
-import aiohttp
 from pathlib import Path
-from libs import others
-from libs.log import logger
-from aiohttp import ClientTimeout
 from typing import List, Optional
+
+# 第三方库
+import aiohttp
+from aiohttp import ClientTimeout
 from pyrogram import filters, Client
 from pyrogram.types.messages_and_media import Message
-from libs.state import state_manager
+
+# 自定义模块
 from app import get_bot_app
-from config.config import proxy_set,PT_GROUP_ID
+from config.config import proxy_set, PT_GROUP_ID
+from libs.log import logger
+from libs.state import state_manager
+
 
 SITE_NAME = "SHARE115TOCMS"
 

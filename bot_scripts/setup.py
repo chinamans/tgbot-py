@@ -1,13 +1,15 @@
+# 标准库
 from enum import Enum
-import pyrogram
-from pyrogram.types import (
-    BotCommand,
-    BotCommandScopeAllPrivateChats,
-)
-from app import get_bot_app
-import logging
 
-logger = logging.getLogger("main")
+# 第三方库
+import pyrogram
+from pyrogram.types import BotCommand, BotCommandScopeAllPrivateChats
+
+# 自定义模块
+from app import get_bot_app
+from libs.log import logger
+
+
 
 ADMINS: dict[str, pyrogram.types.User] = {}
 

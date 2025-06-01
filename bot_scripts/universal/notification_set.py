@@ -1,10 +1,12 @@
-
-from pyrogram.types import Message
+# 第三方库
 from pyrogram import filters, Client
+from pyrogram.types import Message
 
-from libs import others
+# 自定义模块
 from config.config import MY_TGID
+from libs import others
 from libs.state import state_manager
+
 
 @Client.on_message(filters.chat(MY_TGID) & filters.command(["leaderboard", "payleaderboard","notification"]))
 async def notification_switch(client: Client, message: Message):

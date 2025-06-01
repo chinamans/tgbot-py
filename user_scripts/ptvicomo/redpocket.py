@@ -1,12 +1,16 @@
+# 标准库
 import asyncio
 from random import randint
-from pyrogram import filters
-from pyrogram.enums import ParseMode
-from pyrogram.types.messages_and_media import Message
-from pyrogram import filters, Client
 
-from app import Client, logger
+# 第三方库
+from pyrogram import filters, Client
+from pyrogram.enums import ParseMode
+from pyrogram.types import Message
+
+# 自定义模块
 from filters import custom_filters
+from libs.log import logger
+
 
 TARGET = [-1002022762746]
 

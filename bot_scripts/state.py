@@ -1,10 +1,16 @@
+# 标准库
 from pathlib import Path
+
+# 第三方库
 from pyrogram import filters, Client
 from pyrogram.types import Message
+
+# 自定义模块
 from config.config import MY_TGID
 from libs.state import state_manager
 from libs.toml_images import toml_file_to_image
 from libs.sys_info import system_version_get
+
 
 
 

@@ -1,21 +1,15 @@
+# 标准库
 import hashlib
 from datetime import datetime
 
+# 第三方库
 from pyrogram.types import Message
+from sqlalchemy import String, Integer, BigInteger, Numeric, DateTime, func, desc, select
 from sqlalchemy.orm import mapped_column, Mapped
-from sqlalchemy import (
-    String,
-    Integer,
-    BigInteger,
-    Numeric,
-    DateTime,
-    func,
-    desc,
-    select,
-)
 
-from models import async_session_maker
+# 自定义模块
 from config.config import MY_TGID, MY_NAME
+from models import async_session_maker
 from models.database import Base, TimeBase
 
 

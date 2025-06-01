@@ -1,15 +1,18 @@
-import shutil
+# 标准库
 import asyncio
 from pathlib import Path
 from datetime import datetime
-from libs import others
-from app import scheduler,get_bot_app
-from libs.command_tablepy import generate_command_table_image
-from config.config import PT_GROUP_ID
+
+# 第三方库
 from pyrogram import filters, Client
 from pyrogram.types import Message
-from pyrogram.errors import Forbidden
-from pyrogram.errors import FloodWait
+from pyrogram.errors import Forbidden, FloodWait
+
+# 自定义模块
+from app import get_bot_app
+from config.config import PT_GROUP_ID
+from libs import others
+
 
 
 mess_path = Path("temp_file/get_media")

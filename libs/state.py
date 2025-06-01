@@ -1,6 +1,10 @@
-from libs import toml
+# 标准库
 from pathlib import Path
 from copy import deepcopy
+
+# 自定义模块
+from libs import toml
+
 
 state_path = Path("config/state.toml")
 state_path.parent.mkdir(parents=True, exist_ok=True)

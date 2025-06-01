@@ -1,6 +1,8 @@
+# 第三方库
 from pyrogram import filters, Client
 from pyrogram.types import Message
 
+# 自定义模块
 from config.config import MY_TGID
 from libs import others
 from libs.state import state_manager

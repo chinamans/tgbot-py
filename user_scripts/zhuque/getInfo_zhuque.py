@@ -1,12 +1,17 @@
-import aiohttp
+# 标准库
 import asyncio
 import time
-from config.config import MY_TGID,PT_GROUP_ID
+
+# 第三方库
+import aiohttp
 from pyrogram import filters, Client
 from pyrogram.types import Message
+
+# 自定义模块
+from config.config import MY_TGID, PT_GROUP_ID
 from libs import others
-from libs.log import logger
 from libs.state import state_manager
+
 
 SITE_NAME = "zhuque"
 prizes3 = {

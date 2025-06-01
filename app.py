@@ -1,13 +1,19 @@
+# 标准库
 import os
 import json
 from pathlib import Path
+
+# 第三方库
 from pyrogram import Client, idle
+
+# 自定义模块
+from config.config import API_HASH, API_ID, BOT_TOKEN, PT_GROUP_ID, proxy_set
 from libs.log import logger
 from libs.sys_info import system_version_get
 from models import create_all, async_engine
 from models.alter_tables import alter_columns
-from config.config import API_HASH, API_ID, BOT_TOKEN, PT_GROUP_ID, proxy_set
 from schedulers import scheduler, start_scheduler
+
 
 user_app_terminated = False
 user_app: Client = None

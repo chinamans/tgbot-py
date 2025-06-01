@@ -1,7 +1,11 @@
+# 标准库
 import os
-import tomllib  
-import toml     
+import tomllib
 from typing import Dict
+
+# 第三方库
+import toml
+
 
 
 def toml_read_state(file_path) -> dict:

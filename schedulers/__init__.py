@@ -1,6 +1,10 @@
+# 第三方库
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
-from libs.state import state_manager
+
+# 自定义模块
 from libs.log import logger
+from libs.state import state_manager
+
 
 scheduler = AsyncIOScheduler()
 
