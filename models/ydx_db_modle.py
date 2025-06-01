@@ -1,5 +1,6 @@
 # 标准库
 from datetime import datetime
+from typing import Optional, Tuple
 
 # 第三方库
 from sqlalchemy import String, Integer, Numeric, DateTime, func, desc, select
@@ -67,3 +68,33 @@ class Zhuqueydx(Base):
                 win_amount=win_amount
             )
             session.add(redpocket)
+    @classmethod
+    async def get_latest_ydx_info(
+        cls, website: str
+    ) -> Optional[Tuple[str, int, int, float]]:
+        """
+        查询指定网站的最新一条记录的 lottery_result、consecutive_count、bet_count 和 win_amount。
+
+        参数:
+            website (str): 需要查询的站点标识。
+
+        返回:
+            Optional[Tuple[str, int, int, float]]: 如果存在记录，则返回对应字段的元组；
+            否则返回 None。
+        """
+        async with async_session_maker() as session, session.begin():
+            stmt = (
+                select(
+                    cls.lottery_result,
+                    cls.consecutive_count,
+                    cls.bet_count,
+                    cls.win_amount
+                )
+                .where(cls.website == website)
+                .order_by(desc(cls.create_time))
+                .limit(1)
+            )
+            result = (await session.execute(stmt)).one_or_none()
+            if result:
+                return result
+            return None

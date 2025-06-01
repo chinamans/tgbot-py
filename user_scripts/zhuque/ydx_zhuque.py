@@ -15,6 +15,7 @@ from filters import custom_filters
 from models.ydx_db_modle import Zhuqueydx
 from libs.log import logger
 from libs.state import state_manager
+from app import get_user_app, get_bot_app
 
 
 
@@ -22,18 +23,31 @@ TARGET = [-1002262543959]
 SITE_NAME = "zhuque"
 BONUS_NAME = "灵石"
 
+SENDID = {'DIDA':6359018093,#滴答
+          'YY':8049813204, #Yy
+          'MYID':1016485267, #我
+          'LAOTOU':829718065,#老头
+          'PIDAN':8115420654,#皮蛋
+          'QIANBI':6007161815, #铅笔老
+          'R':7811498862, #R
+          'SHUJI':5721909476, #川普书记          
+}
+
 small_count =  0 #连小次数
 big_count = 0   #连大次数
 bet_count = 0   #下注次数 
 
 ########################指定金额下注函数##############################################
 async def zhuque_ydx_manual_bet(bet_amount: int, flag: str, message: Message):
+    
     """
     手动下注任务，根据提供金额依次点击按钮下注。
     :param manual_bet_amount: 用户可用下注总额
     :param flag: 回调按钮标识
     :param message: 原始下注消息对象
     """
+    user_app = get_user_app()
+    rele_betbouns  = 0
     # 可选下注按钮金额，从大到小排列
     bet_values = [50_000_000, 5_000_000, 1_000_000, 250_000, 50_000, 20_000, 2_000, 500]
     bet_counts = []
@@ -57,7 +71,7 @@ async def zhuque_ydx_manual_bet(bet_amount: int, flag: str, message: Message):
             logger.info(f"尝试下注：{bet_value} x1 | callback_data={callback_data}")
             
             try:
-                result_message = await Client.request_callback_answer(
+                result_message = await user_app.request_callback_answer(
                     chat_id=message.chat.id,
                     message_id=message.id,
                     callback_data=callback_data
@@ -77,7 +91,7 @@ async def zhuque_ydx_manual_bet(bet_amount: int, flag: str, message: Message):
 
     logger.info(f"总下注成功金额: {rele_betbouns}")
     if rele_betbouns == 0:
-        await Client.send_message(message.chat.id, "破产了，下注失败")
+        await user_app.send_message(message.chat.id, "破产了，下注失败")
 
 
 ############检查自己的id是否押注或是否中奖###############################################
@@ -213,3 +227,57 @@ async def zhuque_ydx_dice_reveal(client: Client, message: Message):
         bet_amount,
         win_amount
     )
+
+
+
+########################开局监听及判断是否下注##############################
+@Client.on_message(
+    filters.chat(TARGET)
+    & custom_filters.zhuque_bot
+    & filters.regex(r"创建时间")
+)
+async def zhuque_ydx_new_round(client: Client, message: Message):
+    bot_app = get_bot_app() 
+    ydx_dice_bet = state_manager.get_item("ZHUQUE", "ydx_dice_bet", "off")
+    ydx_wwd_switch = state_manager.get_item("ZHUQUE", "ydx_wwd_switch", "off")
+    start_coun = state_manager.get_item("ZHUQUE", "start_coun", "5")
+    stop_count = state_manager.get_item("ZHUQUE", "stop_count", "5")
+    bet_model = state_manager.get_item("ZHUQUE", "bet_model", "a")
+    start_bouns = state_manager.get_item("ZHUQUE", "start_bount", 500)
+
+    result_ydx = await Zhuqueydx.get_latest_ydx_info(SITE_NAME)
+    if result_ydx:
+        lottery_result, consecutive_count, bet_count, win_amount = result_ydx
+
+
+    if ydx_dice_bet == "off":
+        return
+    await zhuque_ydx_models(start_coun, stop_count, start_bouns, result_ydx, message, bet_model)
+
+
+
+
+#下注模式后续搞成Class
+async def zhuque_ydx_models(start_count, stop_bet_count, start_bonus, result_ydx, message: Message, model="a"): 
+    
+    if not result_ydx:
+        return
+    lottery_result, consecutive_count, bet_count, win_amount = result_ydx
+
+    if model.lower() == 'a':
+        opposite_map = {"Big": "s", "Small": "b"}
+        bet_side = opposite_map.get(lottery_result)
+
+        # 开始下注逻辑
+        should_bet = (
+            consecutive_count >= start_count and
+            consecutive_count <= start_count + stop_bet_count and
+            bet_count < stop_bet_count and        
+            bet_side is not None
+        )
+        if should_bet:
+            # 等比下注公式：Sn = a(n² + n) + a
+            bet_bonus = start_bonus * (bet_count ** 2 + bet_count) + start_bonus
+            await zhuque_ydx_manual_bet(bet_bonus, bet_side, message)
+
+            
