@@ -194,6 +194,8 @@ async def zhuque_ydx_dice_reveal(client: Client, message: Message):
                 bet_count += 1
             else:
                 bet_count = 0
+        else:
+            bet_count = 0
 
     # 查询是否中奖
     firstname_reveal = await listofWinners_check(message, MY_TGID)
