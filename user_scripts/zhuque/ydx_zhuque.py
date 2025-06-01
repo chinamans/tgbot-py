@@ -240,7 +240,7 @@ async def zhuque_ydx_new_round(client: Client, message: Message):
     bot_app = get_bot_app() 
     ydx_dice_bet = state_manager.get_item("ZHUQUE", "ydx_dice_bet", "off")
     ydx_wwd_switch = state_manager.get_item("ZHUQUE", "ydx_wwd_switch", "off")
-    start_coun = int(state_manager.get_item("ZHUQUE", "start_coun", 5))
+    start_coun = int(state_manager.get_item("ZHUQUE", "start_count", 5))
     stop_count = int(state_manager.get_item("ZHUQUE", "stop_count", 5))
     bet_model = state_manager.get_item("ZHUQUE", "bet_model", "a")
     start_bouns = (state_manager.get_item("ZHUQUE", "start_bount", 500))
@@ -267,6 +267,7 @@ async def zhuque_ydx_models(start_count, stop_count, start_bonus, result_ydx, me
     bet_count = int(bet_count)
 
     if model.lower() == 'a':
+
         opposite_map = {"Big": "s", "Small": "b"}
         bet_side = opposite_map.get(lottery_result)
 
@@ -277,6 +278,7 @@ async def zhuque_ydx_models(start_count, stop_count, start_bonus, result_ydx, me
             bet_count < stop_count and        
             bet_side is not None
         )
+
         if should_bet:
             # 等比下注公式：Sn = a(n² + n) + a
             bet_bonus = start_bonus * (bet_count ** 2 + bet_count) + start_bonus

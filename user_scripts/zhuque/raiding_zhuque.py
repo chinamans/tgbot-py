@@ -93,64 +93,90 @@ async def zhuque_dajie_be_raided(client: Client, message: Message):
         await zhuque_dajie_fanda(raidcount, message)
 
 
+from random import random
+from pyrogram.types import Message
+
 async def zhuque_dajie_fanda(raidcount: int, message: Message):
     """
-    自动反打程序
+    自动反打程序（根据灵石输赢判断是否触发反打）
     """
-    
-    auto_fanda_switch = state_manager.get_item("ZHUQUE","fanda","off")
+    auto_fanda_switch = state_manager.get_item("ZHUQUE", "fanda", "off")
+    fanxian_switch = state_manager.get_item("ZHUQUE", "fanxian", "off")
+    fanxian_probability = state_manager.get_item("ZHUQUE", "fanxian_probability", 0.1)
     raiding_msg = message.reply_to_message
-    win_amt = extract_lingshi_amount(
-        message.text, r"(亏损|你被反打劫) ([\d\.]+) 灵石\s*$"
-    )
-    lose_amt = extract_lingshi_amount(message.text, r"(获得) ([\d\.]+) 灵石\s*$")
-    if "扣税" in message.text:
-        win_amt = extract_lingshi_amount(
-            message.text, r"(你被反打劫) ([\d\.]+) 灵石\s*$"
-        )
-        lose_amt = extract_lingshi_amount(message.text, r"(获得) ([\d\.]+) 灵石\s*$")
+    if not raiding_msg:
+        print("无法获取被回复的消息，跳过反打处理。")
+        return
 
+    # 默认提取格式
+    win_amt = extract_lingshi_amount(message.text, r"(亏损|你被反打劫) ([\d\.]+) 灵石\s*$")
+    lose_amt = extract_lingshi_amount(message.text, r"(获得) ([\d\.]+) 灵石\s*$")
+
+    # 特殊扣税处理（覆盖默认提取结果）
+    if "扣税" in message.text:
+        win_amt = extract_lingshi_amount(message.text, r"你被反打劫 ([\d\.]+) 灵石\s*$")
+        lose_amt = extract_lingshi_amount(message.text, r"获得 ([\d\.]+) 灵石\s*$")
+
+    # 记录被劫结果
     if win_amt:
         await record_raiding("beraided", win_amt, raidcount, raiding_msg)
     elif lose_amt:
         await record_raiding("beraided", -lose_amt, raidcount, raiding_msg)
 
+    # 计算打劫冷却
     cd_ready = await dajie_cdtime_Calculate()
 
+    # 判断是否触发自动反打逻辑
     if win_amt or lose_amt:
         is_win = bool(win_amt)
-        amount = win_amt if is_win else lose_amt
+        amount = float(win_amt if is_win else lose_amt)
         message_key = "robbedByWin" if is_win else "robbedByLose"
         fanda_off_key = "robbedwinfandaoff" if is_win else "robbedlosfandaoff"
+
         fanda_switch_valid = (
-            (auto_fanda_switch in ("lose", "all")) if is_win else (auto_fanda_switch in ("win", "all"))
+            auto_fanda_switch in ("win", "all") if is_win else auto_fanda_switch in ("lose", "all")
         )
+
+        reply = None
         if fanda_switch_valid:
-            if amount >= 3000 and cd_ready:
+            if not cd_ready:
+                reply = await raiding_msg.reply(ZQ_REPLY_MESSAGE["robbedByLoseCD"])
+            elif amount >= 3000:
                 reply = await raiding_msg.reply(
                     f"/dajie {raidcount} {ZQ_REPLY_MESSAGE[message_key]}"
                 )
-            elif not cd_ready:
-                reply = await raiding_msg.reply(ZQ_REPLY_MESSAGE["robbedByLoseCD"])
             else:
                 reply = await raiding_msg.reply(ZQ_REPLY_MESSAGE["robbedBynosidepot"])
         else:
             reply = await raiding_msg.reply(ZQ_REPLY_MESSAGE[fanda_off_key])
 
-        if state_manager.get_item("ZHUQUE","fanxian","off") == "on" and is_win:
-            if random() < 0.1:
-                Odds = random()
-                await raiding_msg.reply(f"+{int(float(win_amt) * 0.9 * Odds)}")
+        # 概率返现（仅在被反打输时生效）
+        if is_win and fanxian_switch == "on":
+            if random() < fanxian_probability:
+                odds = random()
+                refund = int(float(win_amt) * 0.9 * odds)
+                await raiding_msg.reply(f"+{refund}")
                 fanxian_reply = await raiding_msg.reply(
-                    f"您触发了一次输后返现，表示对您的止损。倍率为{Odds * 100:.2f} %"
+                    f"您触发了一次输后返现，表示对您的止损。倍率为 {odds * 100:.2f} %"
                 )
-                await others.delete_message(fanxian_reply, 20)
+                try:
+                    await others.delete_message(fanxian_reply, 20)
+                except Exception as e:
+                    print(f"删除返现消息失败：{e}")
 
-        await others.delete_message(reply, 20)
+        # 删除主回复消息
+        if reply:
+            try:
+                await others.delete_message(reply, 20)
+            except Exception as e:
+                print(f"删除反打提示消息失败：{e}")
 
-        if not is_win:
-            if float(lose_amt) >= 20000:
-                await raiding_msg.reply_to_message.delete()
+        # 若被劫金额过大，清理原消息
+        if not is_win and amount >= 20000:
+            try:
+                await raiding_msg.delete()
+            except Exception as e:
+                print(f"删除被劫大额消息失败：{e}")
 
 
 async def record_raiding(action: str, amount: Decimal, count: int, message: Message):
