@@ -41,7 +41,6 @@ async def zhuque_dajie_Raiding(client: Client, message: Message):
     raiding_msg = message.reply_to_message
     raidcount_match = re.search(r"^/dajie[\s\S]*\s(\d+)", raiding_msg.text or "")
     raidcount = int(raidcount_match.group(1)) if raidcount_match else 1
-    print(raidcount)
 
     gain = extract_lingshi_amount(message.text, r"(获得) ([\d\.]+) 灵石\s*$")
     loss = extract_lingshi_amount(message.text, r"(亏损|你被反打劫) ([\d\.]+) 灵石\s*$")
@@ -51,7 +50,7 @@ async def zhuque_dajie_Raiding(client: Client, message: Message):
         gain = extract_lingshi_amount(message.text, r"(获得) ([\d\.]+) 灵石\s*$")
     if gain or loss:
         bonus = gain if gain else -loss
-        await record_raiding("raided", bonus, raidcount, raiding_msg)
+        await record_raiding("raiding", bonus, raidcount, raiding_msg)
 
 
 @Client.on_message(
@@ -141,7 +140,7 @@ async def zhuque_dajie_fanda(raidcount: int, message: Message):
         if fanda_switch_valid:
             if not cd_ready:
                 reply = await raiding_msg.reply(ZQ_REPLY_MESSAGE["robbedByLoseCD"])
-            elif amount >= 3000:
+            elif amount >= 2000:
                 reply = await raiding_msg.reply(
                     f"/dajie {raidcount} {ZQ_REPLY_MESSAGE[message_key]}"
                 )
