@@ -243,7 +243,7 @@ async def zhuque_ydx_new_round(client: Client, message: Message):
     start_coun = int(state_manager.get_item("ZHUQUE", "start_count", 5))
     stop_count = int(state_manager.get_item("ZHUQUE", "stop_count", 5))
     bet_model = state_manager.get_item("ZHUQUE", "bet_model", "a")
-    start_bouns = (state_manager.get_item("ZHUQUE", "start_bount", 500))
+    start_bouns = (state_manager.get_item("ZHUQUE", "start_bouns", 500))
 
     result_ydx = await Zhuqueydx.get_latest_ydx_info(SITE_NAME)
     if result_ydx:
