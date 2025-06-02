@@ -37,11 +37,11 @@ def extract_lingshi_amount(text: str, pattern: str) -> Decimal | None:
     & (custom_filters.zhuque_bot | custom_filters.test)
 )
 async def zhuque_dajie_Raiding(client: Client, message: Message):
-    raiding_msg = await client.get_messages(
-        message.chat.id, message.reply_to_message.reply_to_message_id
-    )
+
+    raiding_msg = message.reply_to_message
     raidcount_match = re.search(r"^/dajie[\s\S]*\s(\d+)", raiding_msg.text or "")
     raidcount = int(raidcount_match.group(1)) if raidcount_match else 1
+    print(raidcount)
 
     gain = extract_lingshi_amount(message.text, r"(获得) ([\d\.]+) 灵石\s*$")
     loss = extract_lingshi_amount(message.text, r"(亏损|你被反打劫) ([\d\.]+) 灵石\s*$")
