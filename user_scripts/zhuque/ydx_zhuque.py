@@ -288,8 +288,10 @@ async def zhuque_ydx_models(start_count, stop_count, start_bonus, result_ydx, me
             bet_side is not None
         )
         if should_bet:
-            # 等比下注公式：Sn = a(n² + n) + a   
-            bet_bonus = start_bonus * (auto_bet_count ** 2 + auto_bet_count) + start_bonus  
+            # 等比下注公式：Sn = a(n² + n) + a  
+            # 1000 * (2 ** (n + 1) - 1) 
+            
+            bet_bonus = start_bonus * (2 ** (auto_bet_count + 1) - 1)  
             auto_bet_count +=1      
             await zhuque_ydx_manual_bet(bet_bonus, bet_side, message)
     elif model.lower() == 'b': #启动时随机追一个，连败3败后追上次胜局，连败后3次后继续切上次胜的        
@@ -308,7 +310,7 @@ async def zhuque_ydx_models(start_count, stop_count, start_bonus, result_ydx, me
 
         if should_bet:
             # 等比下注公式：Sn = a(n² + n) + a   
-            bet_bonus = start_bonus * (auto_bet_count ** 2 + auto_bet_count) + start_bonus  
+            bet_bonus = start_bonus * (2 ** (auto_bet_count + 1) - 1)  
             auto_bet_count +=1      
             await zhuque_ydx_manual_bet(bet_bonus, bet_side, message)
 
