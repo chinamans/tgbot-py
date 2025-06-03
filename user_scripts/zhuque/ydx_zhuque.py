@@ -2,6 +2,7 @@
 import re
 import asyncio
 from decimal import Decimal
+from random import random
 from typing import Optional, Tuple
 
 # 第三方库
@@ -22,6 +23,12 @@ from app import get_user_app, get_bot_app
 TARGET = [-1002262543959]
 SITE_NAME = "zhuque"
 BONUS_NAME = "灵石"
+auto_bet_bouns = 0
+auto_bet_count = 0
+small_count =  0 #连小次数
+big_count = 0   #连大次数
+bet_count = 0   #下注次数 
+
 
 SENDID = {'DIDA':6359018093,#滴答
           'YY':8049813204, #Yy
@@ -33,9 +40,8 @@ SENDID = {'DIDA':6359018093,#滴答
           'SHUJI':5721909476, #川普书记          
 }
 
-small_count =  0 #连小次数
-big_count = 0   #连大次数
-bet_count = 0   #下注次数 
+
+
 
 ########################指定金额下注函数##############################################
 async def zhuque_ydx_manual_bet(bet_amount: int, flag: str, message: Message):
@@ -240,10 +246,10 @@ async def zhuque_ydx_new_round(client: Client, message: Message):
     bot_app = get_bot_app() 
     ydx_dice_bet = state_manager.get_item("ZHUQUE", "ydx_dice_bet", "off")
     ydx_wwd_switch = state_manager.get_item("ZHUQUE", "ydx_wwd_switch", "off")
-    start_coun = int(state_manager.get_item("ZHUQUE", "start_count", 5))
-    stop_count = int(state_manager.get_item("ZHUQUE", "stop_count", 5))
-    bet_model = state_manager.get_item("ZHUQUE", "bet_model", "a")
-    start_bouns = (state_manager.get_item("ZHUQUE", "start_bouns", 500))
+    start_coun = int(state_manager.get_item("ZHUQUE", "ydx_start_count", 5))
+    stop_count = int(state_manager.get_item("ZHUQUE", "ydx_stop_count", 5))
+    bet_model = state_manager.get_item("ZHUQUE", "ydx_bet_model", "a")
+    start_bouns = int(state_manager.get_item("ZHUQUE", "ydx_start_bouns", 500))
 
     result_ydx = await Zhuqueydx.get_latest_ydx_info(SITE_NAME)
     if result_ydx:
@@ -259,29 +265,52 @@ async def zhuque_ydx_new_round(client: Client, message: Message):
 
 #下注模式后续搞成Class
 async def zhuque_ydx_models(start_count, stop_count, start_bonus, result_ydx, message: Message, model="a"): 
-    
+    global auto_bet_count
+
     if not result_ydx:
         return
     lottery_result, consecutive_count, bet_count, win_amount = result_ydx
     consecutive_count = int(consecutive_count)
     bet_count = int(bet_count)
+    opposite_map = {"Big": "s", "Small": "b"}
+    bet_side = opposite_map.get(lottery_result)
 
-    if model.lower() == 'a':
+    if win_amount or bet_count == 0:            
+            auto_bet_count = 0     
 
-        opposite_map = {"Big": "s", "Small": "b"}
-        bet_side = opposite_map.get(lottery_result)
-
+    if model.lower() == 'a':  
+        
         # 开始下注逻辑
         should_bet = (
             consecutive_count >= start_count and
             consecutive_count <= (start_count + stop_count) and
-            bet_count < stop_count and        
+            auto_bet_count < stop_count and        
+            bet_side is not None
+        )
+        if should_bet:
+            # 等比下注公式：Sn = a(n² + n) + a   
+            bet_bonus = start_bonus * (auto_bet_count ** 2 + auto_bet_count) + start_bonus  
+            auto_bet_count +=1      
+            await zhuque_ydx_manual_bet(bet_bonus, bet_side, message)
+    elif model.lower() == 'b': #启动时随机追一个，连败3败后追上次胜局，连败后3次后继续切上次胜的        
+
+
+        if auto_bet_count %  2 == 0:
+            flag = "b" if random() < 0.5 else "s"
+        else:
+            flag = bet_side
+
+        should_bet = (
+            consecutive_count >= start_count and
+            auto_bet_count < stop_count and        
             bet_side is not None
         )
 
         if should_bet:
-            # 等比下注公式：Sn = a(n² + n) + a
-            bet_bonus = start_bonus * (bet_count ** 2 + bet_count) + start_bonus
+            # 等比下注公式：Sn = a(n² + n) + a   
+            bet_bonus = start_bonus * (auto_bet_count ** 2 + auto_bet_count) + start_bonus  
+            auto_bet_count +=1      
             await zhuque_ydx_manual_bet(bet_bonus, bet_side, message)
+
 
             
