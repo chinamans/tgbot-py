@@ -98,6 +98,8 @@ async def zhuque_ydx_manual_bet(bet_amount: int, flag: str, message: Message):
     logger.info(f"总下注成功金额: {rele_betbouns}")
     if rele_betbouns == 0:
         await user_app.send_message(message.chat.id, "破产了，下注失败")
+        state_manager.set_section("ZHUQUE", {"ydx_dice_bet": "off"})
+
 
 
 ############检查自己的id是否押注或是否中奖###############################################
