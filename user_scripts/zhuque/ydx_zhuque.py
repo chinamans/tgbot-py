@@ -102,6 +102,7 @@ async def zhuque_ydx_manual_bet(bet_amount: int, flag: str, message: Message):
 
 
 
+
 ############检查自己的id是否押注或是否中奖###############################################
 async def listofWinners_check(message: Message, target_tgid: int) -> Optional[str]:
     if not message.entities:
