@@ -1,7 +1,7 @@
 # 标准库
 import asyncio
 
-# 自定义模块
+#自定义模块
 from app import start_app
 
 
