@@ -16,14 +16,14 @@ async def zhuque_fanda_switch(client: Client, message: Message):
     """
     if len(message.command) < 3:
         await message.reply(
-            "❌ 参数不足。\n"
-            "用法："
-            "\n/ydx dice_reveal on|off ydx 结果记录开关" 
-            "\n/ydx dice_bet on|off ydx 自动下注开关"
-            "\n/ydx start_count num 设置第几连开始下注"
-            "\n/ydx stop_count num 设置连续下注几局没赢停止本次倍投"
-            "\n/ydx start_bouns num 起手倍投金额"
-            "\n/ydx bet_model a|b 下注模式"
+            f"❌ 参数不足。\n"
+            f"用法："
+            f"\n/ydx dice_reveal on|off 结果记录开关" 
+            f"\n/ydx dice_bet on|off    自动下注开关"
+            f"\n/ydx start_count num    设置第几连开始下注"
+            f"\n/ydx stop_count num     设置连续下注几局没赢停止本次倍投"
+            f"\n/ydx start_bouns num    起手倍投金额"
+            f"\n/ydx bet_model a|b      下注模式"
         )
         return
 
