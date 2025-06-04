@@ -18,7 +18,7 @@ medal_emojis = {
 
 medal_emoji_others = "🪙"
 
-async def get_leaderboard(data):
+async def get_leaderboard(data,direction):
     # 配置 wkhtmltoimage 路径
     if os.name == "nt":
         wkhtmltoimage_path = r"D:\Tool Software\wkhtmltopdf\bin\wkhtmltoimage.exe"
@@ -27,13 +27,16 @@ async def get_leaderboard(data):
         wkhtml_config = None
 
     rows = ""
+    table_title = "打赏" if direction != "pay" else "孝敬"
+
+    
     for rank, uid, username, count, amount in data:
         emoji = medal_emojis.get(rank, medal_emoji_others)
         medal_img = f'{emoji} TOP{rank}'
         rows += f"""
         <tr>
             <td>{medal_img}</td>
-            <td>{uid}</td>
+            <td>{mask_tgid(uid)}</td>
             <td>{username}</td>
             <td>{count}</td>
             <td>{amount}</td>
@@ -74,7 +77,7 @@ async def get_leaderboard(data):
     </head>
     <body>
         <table>
-            <caption>🌟🏅🎉 {config.MY_NAME}的个人打赏榜 🎉🏅🌟</caption>
+            <caption>🌟🏅🎉 {config.MY_NAME}的个人{table_title}榜 🎉🏅🌟</caption>
             <thead>
                 <tr>
                     <th>排名</th>
@@ -112,3 +115,10 @@ async def get_leaderboard(data):
     Path(html_file).unlink()    
     return img_file
     
+
+
+def mask_tgid(tgid):
+    tgid_str = str(tgid)
+    if len(tgid_str) <= 4:
+        return tgid_str  # 长度不足 5，直接返回原样
+    return tgid_str[:2] + '*' * (len(tgid_str) - 4) + tgid_str[-2:]

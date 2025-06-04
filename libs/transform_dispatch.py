@@ -56,7 +56,7 @@ async def transform(
                 Direction=direction,
                 top_n=5
             )
-            leaderboard_image_path = await get_leaderboard(top5)
+            leaderboard_image_path = await get_leaderboard(top5, direction)
 
     except Exception as e:
         logger.exception(f"提交失败: 用户消息：{transform_message}, 错误：{e}")
