@@ -28,6 +28,10 @@ BOT_COMMANDS: list[tuple[BotCommand, list[CommandScope]]] = [
         [CommandScope.PRIVATE_CHATS],
     ),
     (
+        BotCommand("restart", "重启脚本"),
+        [CommandScope.PRIVATE_CHATS],
+    ),
+    (
         BotCommand("dajie", "朱雀dajie相关设置"),
         [CommandScope.PRIVATE_CHATS],
     ),    
