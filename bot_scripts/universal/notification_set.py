@@ -17,10 +17,11 @@ async def notification_switch(client: Client, message: Message):
 
     if len(message.command) < 3:
         await message.reply(
-            "❌ 参数不足。\n用法：\n"
-            "/leaderboard website|all on|off"
-            "/payleaderboard website|all on|off"
-            "/notification website|all on|off"
+            f"❌ 参数不足。"
+            f"\n用法："
+            f"\n/leaderboard website|all on|off         websit：站点名 如zhuque 转入魔力排名图片开关，关闭后只发文字 "
+            f"\n/payleaderboard website|all on|off      websit：站点名 如zhuque 转出魔力排名图片开关，关闭后只发文字"
+            f"\n/notification website|all on|off        websit：站点名 如zhuque 转入转出提示消息开关，关闭后什么都不发"
         )
         return
 

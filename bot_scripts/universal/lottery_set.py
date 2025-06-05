@@ -20,7 +20,7 @@ async def lottery_switch(client: Client, message: Message):
     用法：/lotterysw on | off
     """
     if len(message.command) < 2:
-        await message.reply("❌ 参数不足。\n用法：`/lotterysw on | off`")
+        await message.reply("❌ 参数不足。\n用法：`/lotterysw on | off` ")
         return
     action = message.command[1].lower()
     valid_modes = { "on", "off"}
@@ -68,6 +68,9 @@ async def lottery_time(client: Client, message: Message):
 
     def is_valid_time_format(s: str) -> bool:
         return re.fullmatch(r"(?:[01]\d|2[0-3]):[0-5]\d", s) is not None
+    if len(message.command) < 2:
+        await message.reply("参数不足。用法：`/lotterytime 08:00 10:00 12:00 23:00`")
+        return
 
     commands = message.command
     args = commands[1:] if len(commands) > 1 else []

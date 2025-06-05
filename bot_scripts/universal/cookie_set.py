@@ -16,9 +16,10 @@ async def notification_switch(client: Client, message: Message):
 
     if len(message.command) < 3:
         await message.reply(
-            "❌ 参数不足。\n用法：\n"
-            "/cookie website str"
-            "/xcsrf website str "
+            f"❌ 参数不足。\n"
+            f"用法："
+            f"\n/cookie website str     websit：站点名 如zhuque str：cookie" 
+            f"\n/xcsrf website str    websit：站点名 如zhuque x-csrf 目前只有zhuque需要"            
         )
         return
 

@@ -50,8 +50,12 @@ async def share115tocms_info_set(client: Client, message: Message):
 
     if len(message.command) < 3:
         await message.reply(
-            "❌ 参数不足。\n用法：\n"
-            "/set115tocms keyword str"
+            f"❌ 参数不足。\n"
+            f"用法："
+            f"\n/set115tocms cmsbot bot_id    设置CMS的botid(不是API)" 
+            f"\n/set115tocms embyapi api_key    设置emby的API_key"  
+            f"\n/set115tocms embyserver ip    设置emby的地址如：http://172.0.0.1:8096/ 特别注意不要地址要有http://，最后要有'/'"
+            f"\n/set115tocms tmdbapi api_key    设置TMDB的API_key" 
         )
         return
 

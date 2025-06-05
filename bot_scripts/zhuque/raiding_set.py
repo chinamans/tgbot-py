@@ -61,7 +61,11 @@ async def blockyword_add_remove(client: Client, message: Message):
     """
 
     if len(message.command) < 3:
-        await message.reply("参数不足。用法：`/blacklist add TGID` 或 `/blacklist remove TGID` ")
+        await message.reply(
+            f"❌参数不足。用法："
+            f"\n/blacklist add TGID     增加黑名单可以添加多个，但一次只能添加一个"
+            f"\n/blacklist remove TGID  移除黑名单一次只能移除一个"
+            )
         return
     cmd_name = message.command[0].lower()
     action = message.command[1].lower()

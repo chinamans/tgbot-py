@@ -23,7 +23,7 @@ async def zhuque_fanda_switch(client: Client, message: Message):
             f"\n/ydx start_count num    设置第几连开始下注"
             f"\n/ydx stop_count num     设置连续下注几局没赢停止本次倍投"
             f"\n/ydx start_bouns num    起手倍投金额"
-            f"\n/ydx bet_model a|b      下注模式"
+            f"\n/ydx bet_model a|b      下注模式 a:返投模式 b:首投随机连续两输再次随机"
         )
         return
 

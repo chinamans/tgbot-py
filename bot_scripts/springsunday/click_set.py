@@ -19,7 +19,11 @@ async def ssd_click_switch(client: Client, message: Message):
     用法：/ssd_click once | 5min | off
     """
     if len(message.command) < 2:
-        await message.reply("❌ 参数不足。\n用法：`/ssd_click once | 5min | off`")
+        await message.reply(
+            f"❌ 参数不足。\n"
+            f"用法："
+            f"\n/ssd_click once | 5min | off 大额转账确认开关 本次 |5分钟内 |关闭"            
+        )
         return
 
     action = message.command[1].lower()
