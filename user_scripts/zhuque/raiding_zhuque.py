@@ -101,7 +101,8 @@ async def zhuque_dajie_fanda(raidcount: int, message: Message):
     """
     auto_fanda_switch = state_manager.get_item("ZHUQUE", "fanda", "off")
     fanxian_switch = state_manager.get_item("ZHUQUE", "fanxian", "off")
-    fanxian_probability = state_manager.get_item("ZHUQUE", "fanxian_probability", 0.1)
+    fanxian_probability = float(state_manager.get_item("ZHUQUE", "probability", 1)) / 100
+    print(fanxian_probability)
     raiding_msg = message.reply_to_message
     if not raiding_msg:
         print("无法获取被回复的消息，跳过反打处理。")
