@@ -65,7 +65,7 @@ async def transform(
 
     if notification == "on":
         text = build_message(user, bonus, bonus_name, sumcount, sumbonus, user_ranking, direction)
-        if direction == "get":            
+        if direction == "get" and int(bonus) > 3000:            
             await transform_message.reply_sticker(reply_message.LOTTERY_Sticker_REPLY_MESSAGE[f"thank{randint(1,5)}"])
 
         if leaderboard_image_path:
