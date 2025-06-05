@@ -102,7 +102,8 @@ async def zhuque_dajie_fanda(raidcount: int, message: Message):
     auto_fanda_switch = state_manager.get_item("ZHUQUE", "fanda", "off")
     fanxian_switch = state_manager.get_item("ZHUQUE", "fanxian", "off")
     fanxian_probability = float(state_manager.get_item("ZHUQUE", "probability", 1)) / 100
-    print(fanxian_probability)
+    fanxian_blacklist = state_manager.get_item(SITE_NAME.upper(),"blacklist",[])
+
     raiding_msg = message.reply_to_message
     if not raiding_msg:
         print("无法获取被回复的消息，跳过反打处理。")
@@ -152,6 +153,8 @@ async def zhuque_dajie_fanda(raidcount: int, message: Message):
 
         # 概率返现（仅在被反打输时生效）
         if is_win and fanxian_switch == "on":
+            if raiding_msg.from_user.id in fanxian_blacklist:
+                return
             if random() < fanxian_probability:
                 odds = random()
                 refund = int(float(win_amt) * 0.9 * odds)

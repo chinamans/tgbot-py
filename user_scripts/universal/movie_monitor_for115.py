@@ -177,11 +177,9 @@ async def get_movies(title: str, year: Optional[str] = None, media_type: Optiona
         # 使用 aiohttp 异步请求
         async with aiohttp.ClientSession() as session:
             async with session.get(url, params=params) as response:
-                res = await response.json() 
-                print("res",res)               
+                res = await response.json()                     
                 if res:
-                    res_items = res.get("Items")
-                    print("，res_items",res_items)
+                    res_items = res.get("Items")                    
                     if res_items:
                         tmdb_values = []
                         tmdb_values = [item['ProviderIds'].get('Tmdb') for item in res_items if 'Tmdb' in item['ProviderIds']]                        
