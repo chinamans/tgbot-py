@@ -108,9 +108,5 @@ async def blockyword_add_remove(client: Client, message: Message):
     else:
         await message.reply("无效参数。请使用 `add` 或 `remove`")
    
-    if re_mess:
-        await others.delete_message(re_mess,15)
-
-
 
 

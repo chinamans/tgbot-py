@@ -91,6 +91,3 @@ async def blockyword_add_remove(client: Client, message: Message):
         re_mess=await message.reply(f'黑名单 {words}{action}成功\n当前当前黑名单以下：{fanxian_blacklist}')
     else:
         await message.reply("无效参数。请使用 `add` 或 `remove`")
-   
-    if re_mess:
-        await others.delete_message(re_mess,15)
