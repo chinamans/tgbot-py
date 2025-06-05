@@ -34,7 +34,11 @@ BOT_COMMANDS: list[tuple[BotCommand, list[CommandScope]]] = [
     (
         BotCommand("dajie", "朱雀dajie相关设置"),
         [CommandScope.PRIVATE_CHATS],
-    ),    
+    ),  
+    (
+        BotCommand("blacklist", "朱雀dajie不予返现黑名设置"),
+        [CommandScope.PRIVATE_CHATS],
+    ),        
     (
         BotCommand("ydx", "朱雀ydx菠菜自动投注设置"),
         [CommandScope.PRIVATE_CHATS],
