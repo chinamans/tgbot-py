@@ -21,7 +21,7 @@ async def zhuque_fanda_switch(client: Client, message: Message):
             f"用法："
             f"\n/dajie fanda lose|win|all|off   自动反击启用及模式" 
             f"\n/dajie fanxian on|off    被打劫赢时给对方返现模式开关"
-            f"\n/dajie probability rate   返现触发概率"
+            f"\n/dajie probability 1~100   返现触发概率"
         )
         return
     command = message.command[1].lower()
