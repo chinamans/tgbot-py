@@ -13,7 +13,7 @@ from libs.log import logger
 
 # 监听来自指定TG用户的 /update 命令
 @Client.on_message(filters.chat(MY_TGID) & filters.command("update"))
-async def restart_tg_bot(client: Client, message: Message):
+async def update_tg_bot(client: Client, message: Message):
     # 回复用户，提示正在检测更新
     reply_message = await message.reply("开始更新...")
 
