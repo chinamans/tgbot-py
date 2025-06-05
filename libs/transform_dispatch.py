@@ -1,12 +1,12 @@
 # 标准库
 import os
 from pathlib import Path
-
+from random import randint
 # 第三方库
 from pyrogram.types import Message
 
 # 自定义模块
-from config import config
+from config import config, reply_message
 from libs import others
 from libs.log import logger
 from libs.leaderboard_imge import get_leaderboard
@@ -65,6 +65,8 @@ async def transform(
 
     if notification == "on":
         text = build_message(user, bonus, bonus_name, sumcount, sumbonus, user_ranking, direction)
+        if direction == "get":            
+            await transform_message.reply_sticker(reply_message.LOTTERY_Sticker_REPLY_MESSAGE[f"thank{randint(1,5)}"])
 
         if leaderboard_image_path:
             # 拼接额外提示信息
