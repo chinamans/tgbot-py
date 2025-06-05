@@ -11,10 +11,12 @@ from libs.log import logger
 from libs.state import state_manager
 from models.redpocket_db_modle import Redpocket
 from schedulers import scheduler
+from config.config import PT_GROUP_ID
+
 
 
 SITE_NAME = "zhuque"
-
+BONUS_NAME = "灵石"
 
 url = "https://zhuque.in/api/gaming/fireGenshinCharacterMagic"
 
@@ -77,6 +79,9 @@ async def zhuque_autofire_firsttimeget():
 
 
 async def zhuque_autofire():
+    from app import get_bot_app
+    bot_app = get_bot_app()
+    now = datetime.now()
     try:
         result1 = await fireGenshinCharacterMagic()
         await asyncio.sleep(2)
@@ -89,13 +94,16 @@ async def zhuque_autofire():
         success = any("SUCCESS" in code for code in (code1, code2))
 
         if success and total_bonus > 0:
-            next_time = datetime.now() + timedelta(days=1)
+            next_time = now + timedelta(days=1)
             logger.info(
                 f"释放成功：共得 {total_bonus} 灵石，下次时间：{next_time.isoformat()}"
             )
             await Redpocket.add_redpocket_record(SITE_NAME, "firegenshin", total_bonus)
+            
+            await bot_app.send_message(PT_GROUP_ID["BOT_MESSAGE_CHAT"], f"{now,SITE_NAME} 释放获得 {total_bonus, BONUS_NAME} " )
+
         else:
-            next_time = datetime.now() + timedelta(minutes=15)
+            next_time = now + timedelta(minutes=15)
             logger.warning(f"释放失败或无奖励，15分钟后重试：{next_time.isoformat()}")
         scheduler.add_job(
             zhuque_autofire,
