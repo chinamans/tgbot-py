@@ -24,4 +24,6 @@ pypinyin
 toml
 pygments
 pandas
+openpyxl
 numpy
+
