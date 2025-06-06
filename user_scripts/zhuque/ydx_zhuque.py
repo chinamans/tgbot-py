@@ -16,8 +16,8 @@ from filters import custom_filters
 from models.ydx_db_modle import Zhuqueydx
 from libs.log import logger
 from libs.state import state_manager
+from libs.ydx_betmodel import models as bet_models
 from app import get_user_app, get_bot_app
-
 
 
 TARGET = [-1002262543959]
@@ -25,27 +25,25 @@ SITE_NAME = "zhuque"
 BONUS_NAME = "灵石"
 auto_bet_bouns = 0
 auto_bet_count = 0
-small_count =  0 #连小次数
-big_count = 0   #连大次数
-bet_count = 0   #下注次数 
+small_count = 0  # 连小次数
+big_count = 0  # 连大次数
+bet_count = 0  # 下注次数
 
 
-SENDID = {'DIDA':6359018093,#滴答
-          'YY':8049813204, #Yy
-          'MYID':1016485267, #我
-          'LAOTOU':829718065,#老头
-          'PIDAN':8115420654,#皮蛋
-          'QIANBI':6007161815, #铅笔老
-          'R':7811498862, #R
-          'SHUJI':5721909476, #川普书记          
+SENDID = {
+    "DIDA": 6359018093,  # 滴答
+    "YY": 8049813204,  # Yy
+    "MYID": 1016485267,  # 我
+    "LAOTOU": 829718065,  # 老头
+    "PIDAN": 8115420654,  # 皮蛋
+    "QIANBI": 6007161815,  # 铅笔老
+    "R": 7811498862,  # R
+    "SHUJI": 5721909476,  # 川普书记
 }
-
-
 
 
 ########################指定金额下注函数##############################################
 async def zhuque_ydx_manual_bet(bet_amount: int, flag: str, message: Message):
-    
     """
     手动下注任务，根据提供金额依次点击按钮下注。
     :param manual_bet_amount: 用户可用下注总额
@@ -53,7 +51,7 @@ async def zhuque_ydx_manual_bet(bet_amount: int, flag: str, message: Message):
     :param message: 原始下注消息对象
     """
     user_app = get_user_app()
-    rele_betbouns  = 0
+    rele_betbouns = 0
     # 可选下注按钮金额，从大到小排列
     bet_values = [50_000_000, 5_000_000, 1_000_000, 250_000, 50_000, 20_000, 2_000, 500]
     bet_counts = []
@@ -75,18 +73,18 @@ async def zhuque_ydx_manual_bet(bet_amount: int, flag: str, message: Message):
         for _ in range(count):
             callback_data = f'{{"t":"{flag}","b":{int(bet_value)},"action":"ydxxz"}}'
             logger.info(f"尝试下注：{bet_value} x1 | callback_data={callback_data}")
-            
+
             try:
                 result_message = await user_app.request_callback_answer(
                     chat_id=message.chat.id,
                     message_id=message.id,
-                    callback_data=callback_data
+                    callback_data=callback_data,
                 )
                 logger.debug(f"下注结果: {result_message.message}")
 
                 if "零食不足" in result_message.message:
                     logger.warning(f"零食不足，尝试降一档下注")
-                    break  
+                    break
                 else:
                     rele_betbouns += bet_value
                     await asyncio.sleep(1)
@@ -101,8 +99,6 @@ async def zhuque_ydx_manual_bet(bet_amount: int, flag: str, message: Message):
         state_manager.set_section("ZHUQUE", {"ydx_dice_bet": "off"})
 
 
-
-
 ############检查自己的id是否押注或是否中奖###############################################
 async def listofWinners_check(message: Message, target_tgid: int) -> Optional[str]:
     if not message.entities:
@@ -114,21 +110,23 @@ async def listofWinners_check(message: Message, target_tgid: int) -> Optional[st
             return user.first_name or "unknown"
     return None
 
+
 ######################### 查询对应firstname中奖金额###############################
 def extract_winner_amount(text: str, winner_name: str) -> int | None:
     for line in text.splitlines():
         line = line.strip()
-        if winner_name in line and ':' in line:
+        if winner_name in line and ":" in line:
             # 取最后一个冒号后的内容
-            parts = line.rsplit(':', 1)
+            parts = line.rsplit(":", 1)
             if len(parts) == 2:
-                amount_str = parts[-1].strip().replace(',', '')
+                amount_str = parts[-1].strip().replace(",", "")
                 if amount_str.isdigit():
                     return int(amount_str)
     return None
 
 
 ######################### 查询自定用户名是押注方位和大小###############################
+
 
 def extract_bet_info(text: str, target_name: str) -> Optional[Tuple[str, int]]:
     current_area = None
@@ -143,13 +141,13 @@ def extract_bet_info(text: str, target_name: str) -> Optional[Tuple[str, int]]:
         elif line.startswith("押小:"):
             current_area = "押小"
             continue
-        
-        if current_area and ':' in line:
-            parts = line.rsplit(':', 1)
+
+        if current_area and ":" in line:
+            parts = line.rsplit(":", 1)
             if len(parts) == 2:
                 name, amount_str = parts
                 name = name.strip()
-                amount_str = amount_str.strip().replace(',', '')
+                amount_str = amount_str.strip().replace(",", "")
                 if target_name in name and amount_str.isdigit():
                     amount = int(amount_str)
                     return area_map[current_area], amount
@@ -157,8 +155,8 @@ def extract_bet_info(text: str, target_name: str) -> Optional[Tuple[str, int]]:
     return None
 
 
-
 ####################开骰结果监听######################
+
 
 @Client.on_message(
     filters.chat(TARGET)
@@ -169,8 +167,8 @@ def extract_bet_info(text: str, target_name: str) -> Optional[Tuple[str, int]]:
 ########################开奖结果监听函数##############################
 async def zhuque_ydx_dice_reveal(client: Client, message: Message):
     global small_count  # 连小次数
-    global big_count    # 连大次数
-    global bet_count    # 下注次数
+    global big_count  # 连大次数
+    global bet_count  # 下注次数
 
     bet_side = ""
     bet_amount = 0
@@ -193,6 +191,9 @@ async def zhuque_ydx_dice_reveal(client: Client, message: Message):
         die_point = int(match.group(1))
         result_map = {"大": "Big", "小": "Small"}
         lottery_result = result_map.get(match.group(2), "unknown")
+        dx = 1 if lottery_result == "Big" else 0
+        for md in bet_models.values():
+            md.set_result(dx)
 
     # 计算连续方向
     if lottery_result == "Big":
@@ -234,19 +235,16 @@ async def zhuque_ydx_dice_reveal(client: Client, message: Message):
         bet_side,
         bet_count,
         bet_amount,
-        win_amount
+        win_amount,
     )
-
 
 
 ########################开局监听及判断是否下注##############################
 @Client.on_message(
-    filters.chat(TARGET)
-    & custom_filters.zhuque_bot
-    & filters.regex(r"创建时间")
+    filters.chat(TARGET) & custom_filters.zhuque_bot & filters.regex(r"创建时间")
 )
 async def zhuque_ydx_new_round(client: Client, message: Message):
-    bot_app = get_bot_app() 
+    bot_app = get_bot_app()
     ydx_dice_bet = state_manager.get_item("ZHUQUE", "ydx_dice_bet", "off")
     ydx_wwd_switch = state_manager.get_item("ZHUQUE", "ydx_wwd_switch", "off")
     start_coun = int(state_manager.get_item("ZHUQUE", "ydx_start_count", 5))
@@ -254,68 +252,47 @@ async def zhuque_ydx_new_round(client: Client, message: Message):
     bet_model = state_manager.get_item("ZHUQUE", "ydx_bet_model", "a")
     start_bouns = int(state_manager.get_item("ZHUQUE", "ydx_start_bouns", 500))
 
-    result_ydx = await Zhuqueydx.get_latest_ydx_info(SITE_NAME)
-    if result_ydx:
-        lottery_result, consecutive_count, bet_count, win_amount = result_ydx
-
-
     if ydx_dice_bet == "off":
         return
-    await zhuque_ydx_models(start_coun, stop_count, start_bouns, result_ydx, message, bet_model)
+    await zhuque_ydx_models(start_coun, stop_count, start_bouns, message, bet_model)
 
 
+async def history_list(message: Message):
+    """
+    通过秋人提供的40个数据来生成历史数据列表
+
+    Args:
+        message (Message): tgmessage
+    Returns:
+        single_line_list(list[int]): 最后40个数据用于预测
+    """
+    lines = message.text.strip().split("\n")
+    single_line_list = []
+    for line in lines[1:5]:
+        line = line.strip("[]").split()
+        line = [int(num) for num in line]
+        single_line_list.extend(line)
+    single_line_list.reverse()
+    return single_line_list
 
 
-#下注模式后续搞成Class
-async def zhuque_ydx_models(start_count, stop_count, start_bonus, result_ydx, message: Message, model="a"): 
-    global auto_bet_count
-
-    if not result_ydx:
-        return
-    lottery_result, consecutive_count, bet_count, win_amount = result_ydx
-    consecutive_count = int(consecutive_count)
-    bet_count = int(bet_count)
-    opposite_map = {"Big": "s", "Small": "b"}
-    bet_side = opposite_map.get(lottery_result)
-
-    if win_amount or bet_count == 0:            
-            auto_bet_count = 0     
-
-    if model.lower() == 'a':  
-        
-        # 开始下注逻辑
-        should_bet = (
-            consecutive_count >= start_count and
-            consecutive_count <= (start_count + stop_count) and
-            auto_bet_count < stop_count and        
-            bet_side is not None
-        )
-        if should_bet:
-            # 等比下注公式：Sn = a(n² + n) + a  
-            # 1000 * (2 ** (n + 1) - 1) 
-            
-            bet_bonus = start_bonus * (2 ** (auto_bet_count + 1) - 1)  
-            auto_bet_count +=1      
-            await zhuque_ydx_manual_bet(bet_bonus, bet_side, message)
-    elif model.lower() == 'b': #启动时随机追一个，连败3败后追上次胜局，连败后3次后继续切上次胜的        
-
-
-        if auto_bet_count %  2 == 0:
-            flag = "b" if random() < 0.5 else "s"
-        else:
-            flag = bet_side
-
-        should_bet = (
-            consecutive_count >= start_count and
-            auto_bet_count < stop_count and        
-            bet_side is not None
-        )
-
-        if should_bet:
-            # 等比下注公式：Sn = a(n² + n) + a   
-            bet_bonus = start_bonus * (2 ** (auto_bet_count + 1) - 1)  
-            auto_bet_count +=1      
-            await zhuque_ydx_manual_bet(bet_bonus, bet_side, message)
-
-
-            
+# 下注模式后续搞成Class
+async def zhuque_ydx_models(
+    start_count, stop_count, start_bonus, message: Message, model="a"
+):
+    opposite_map = "sb"
+    # 通过bet_models获取下注方向 0,1
+    bet_model = bet_models[model.lower()]
+    data = await history_list(message)
+    dx = bet_model.guess(data)
+    logger.info(f"猜测结果 dx={dx}, 数据={data}, 模型={model}")
+    # 0,1 转为 s,b
+    bet_side = opposite_map[dx]
+    # 自动下注次数
+    bet_count = bet_model.fail_count - start_count
+    should_bet = 0 <= bet_count <= stop_count and bet_side is not None
+    if should_bet:
+        # 等比下注公式：Sn = a(n² + n) + a
+        # 1000 * (2 ** (n + 1) - 1)
+        bet_bonus = start_bonus * (2 ** (bet_count + 1) - 1)
+        await zhuque_ydx_manual_bet(bet_bonus, bet_side, message)

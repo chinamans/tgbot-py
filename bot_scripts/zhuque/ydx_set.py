@@ -6,6 +6,8 @@ from pyrogram.types import Message
 from config.config import MY_TGID
 from libs import others
 from libs.state import state_manager
+from libs.ydx_betmodel import models as bet_models
+
 
 @Client.on_message(filters.chat(MY_TGID) & filters.command("ydx"))
 async def zhuque_fanda_switch(client: Client, message: Message):
@@ -18,12 +20,12 @@ async def zhuque_fanda_switch(client: Client, message: Message):
         await message.reply(
             f"❌ 参数不足。\n"
             f"用法："
-            f"\n/ydx dice_reveal on|off 结果记录开关" 
+            f"\n/ydx dice_reveal on|off 结果记录开关"
             f"\n/ydx dice_bet on|off    自动下注开关"
             f"\n/ydx start_count num    设置第几连开始下注"
             f"\n/ydx stop_count num     设置连续下注几局没赢停止本次倍投"
             f"\n/ydx start_bouns num    起手倍投金额"
-            f"\n/ydx bet_model a|b      下注模式 a:返投模式 b:首投随机连续两输再次随机"
+            f"\n/ydx bet_model {"|".join(bet_models.keys())}     下注模式 a:返投 模式 b:跟投 c:大 d:小 e:首投随机连续两输再次随机"
         )
         return
 
@@ -36,11 +38,11 @@ async def zhuque_fanda_switch(client: Client, message: Message):
         "start_count": "number",
         "stop_count": "number",
         "start_bouns": "number",
-        "bet_model": {"a", "b"},
+        "bet_model": bet_models.keys(),
     }
 
     if command not in command_modes:
-        valid_cmds = ', '.join(sorted(command_modes))
+        valid_cmds = ", ".join(sorted(command_modes))
         await message.reply(f"❌ 无效命令。\n有效命令有：`{valid_cmds}`")
         return
 
@@ -50,7 +52,7 @@ async def zhuque_fanda_switch(client: Client, message: Message):
             await message.reply(f"❌ 非法参数。`{command}` 命令要求参数为数字")
             return
     elif action not in valid_actions:
-        opts = ', '.join(valid_actions)
+        opts = ", ".join(valid_actions)
         await message.reply(f"❌ 非法参数。`{command}` 命令有效选项为：{opts}")
         return
 

@@ -1,9 +1,13 @@
 from abc import ABC, abstractmethod
+import random
 
 
 class BetModel(ABC):
+    fail_count: int = 0
+    guess_dx: int = -1
+
     @abstractmethod
-    def bet_model(self, data):
+    def guess(self, data):
         pass
 
     def test(self, data: list[int]):
@@ -13,9 +17,10 @@ class BetModel(ABC):
         total_count = 0
         for i in range(40, len(data) + 1):
             data_i = data[i - 40 : i]
-            dx = self.bet_model(data_i)
+            dx = self.guess(data_i)
             if i < len(data):
                 total_count += 1
+                self.set_result(data[i])
                 if data[i] == dx:
                     loss_count[turn_loss_count] += 1
                     win_count += 1
@@ -39,28 +44,48 @@ class BetModel(ABC):
             "guess": dx,
         }
 
+    def set_result(self, result: int):
+        if self.guess_dx != -1:
+            if result == self.guess_dx:
+                self.fail_count = 0
+            else:
+                self.fail_count += 1
+
 
 class A(BetModel):
-    def bet_model(self, data):
-        return 1 - data[-1]
+    def guess(self, data):
+        self.guess_dx = 1 - data[-1]
+        return self.guess_dx
 
 
 class B(BetModel):
-    def bet_model(self, data):
-        return data[-1]
+    def guess(self, data):
+        self.guess_dx = data[-1]
+        return self.guess_dx
 
 
 class C(BetModel):
-    def bet_model(self, data):
-        return 1
+    def guess(self, data):
+        self.guess_dx = 1
+        return self.guess_dx
 
 
 class D(BetModel):
-    def bet_model(self, data):
-        return 0
+    def guess(self, data):
+        self.guess_dx = 0
+        return self.guess_dx
 
 
-models: dict[str, BetModel] = {"A": A(), "B": B(), "C": C(), "D": D()}
+class E(BetModel):
+    def guess(self, data):
+        if self.guess_dx == -1:
+            self.guess_dx = random.randint(0, 1)
+        if self.fail_count % 2 == 0:
+            self.guess_dx = random.randint(0, 1)
+        return self.guess_dx
+
+
+models: dict[str, BetModel] = {"a": A(), "b": B(), "c": C(), "d": D(), "e": E()}
 
 
 def test(data: list[int]):
