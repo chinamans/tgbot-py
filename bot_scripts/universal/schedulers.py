@@ -1,10 +1,15 @@
+# 标准库
+import traceback
+
 # 第三方库
 from pyrogram import filters, Client
 from pyrogram.types import Message
 
 # 自定义模块
+from app import get_user_app
 from config.config import MY_TGID
 from libs.state import state_manager
+from libs.log import logger
 from schedulers import scheduler, scheduler_jobs
 
 
@@ -25,7 +30,7 @@ async def scheduler_switch_handler(client: Client, message: Message):
     控制调度任务的开关（如自动释放技能、自动更改昵称）。
     用法: /autofire on|off 或 /autochangename on|off
     """
-
+    user_app = get_user_app()
     if len(message.command) < 2:
         await message.reply("❌ 参数不足。\n用法：`/autofire on|off` 或 `/autochangename on|off`")
         return
@@ -45,9 +50,16 @@ async def scheduler_switch_handler(client: Client, message: Message):
     state_manager.set_section("SCHEDULER", {command: action})
 
     # 移除已有任务（防止重复）
-    scheduler.remove_job(job_id=command, jobstore=None) if scheduler.get_job(command) else None
+    scheduler.remove_job(job_id=command, jobstfore=None) if scheduler.get_job(command) else None
     if action == "off":
+        if command == "autochangename":
+            try:
+                await user_app.update_profile(last_name= "") 
+            except Exception as e:
+                trac = "\n".join(traceback.format_exception(e))
+                logger.info(f"更新失败! \n{trac}")
         await message.reply(f"🛑 `{command}` 模式已关闭")
+
     else:
         try:            
             await scheduler_jobs[command]()

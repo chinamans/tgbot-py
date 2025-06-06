@@ -24,10 +24,10 @@ async def auto_changename_action():
             .astimezone(timezone(timedelta(hours=8)))  # 转换为东八区时间
             .strftime("%H:%M:%S:%p:%a")  # 格式化输出   
         )
+        random_emoji = random.choice(emojis)
 
         hour, minu, seco, p, abbwn = time_cur.split(":")        
         # 生成动态后缀
-        random_emoji = random.choice(emojis)
         _last_name = f"{random_emoji}{hour}:{minu}"
         await user_app.update_profile(last_name=_last_name)       
         # 验证更新结果
@@ -37,6 +37,7 @@ async def auto_changename_action():
     except Exception as e:
         trac = "\n".join(traceback.format_exception(e))
         logger.info(f"更新失败! \n{trac}")
+        
 
 async def auto_changename_temp():
     changename_switch = state_manager.get_item("SCHEDULER","autochangename","off")
