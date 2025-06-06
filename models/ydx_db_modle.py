@@ -11,7 +11,6 @@ from models.database import Base
 from models import async_session_maker
 
 
-
 class Zhuqueydx(Base):
     """
     朱雀ydx 数据库
@@ -23,7 +22,7 @@ class Zhuqueydx(Base):
     website: Mapped[str] = mapped_column(String(32))
     die_point: Mapped[int] = mapped_column(Integer)
     lottery_result: Mapped[str] = mapped_column(String(32))
-    consecutive_count: Mapped[int] = mapped_column(Integer)       
+    consecutive_count: Mapped[int] = mapped_column(Integer)
     bet_side: Mapped[str] = mapped_column(String(32))
     bet_count: Mapped[int] = mapped_column(Integer)
     bet_amount: Mapped[float] = mapped_column(Numeric(16, 2))
@@ -60,14 +59,15 @@ class Zhuqueydx(Base):
             redpocket = cls(
                 website=website,
                 die_point=die_point,
-                lottery_result=lottery_result, 
+                lottery_result=lottery_result,
                 consecutive_count=consecutive_count,
                 bet_side=bet_side,
                 bet_count=bet_count,
                 bet_amount=bet_amount,
-                win_amount=win_amount
+                win_amount=win_amount,
             )
             session.add(redpocket)
+
     @classmethod
     async def get_latest_ydx_info(
         cls, website: str
@@ -88,13 +88,42 @@ class Zhuqueydx(Base):
                     cls.lottery_result,
                     cls.consecutive_count,
                     cls.bet_count,
-                    cls.win_amount
+                    cls.win_amount,
                 )
                 .where(cls.website == website)
                 .order_by(desc(cls.create_time))
                 .limit(1)
             )
             result = (await session.execute(stmt)).one_or_none()
+            if result:
+                return result
+            return None
+
+    @classmethod
+    async def get_data(
+        cls, website: str = "zhuque", limit: int = 1
+    ) -> Optional[Tuple[str, int, int, float]]:
+        """
+        查询指定网站的最新 limit 条 die_point 记录。
+
+        参数:
+            website (str): 需要查询的站点标识。
+            limit (int): 查询的记录条数，默认为 1。
+
+        返回:
+            Optional[List[int]]: 如果存在记录，则返回 die_point 列表；
+            否则返回 None。
+        """
+        async with async_session_maker() as session, session.begin():
+            stmt = (
+                select(
+                    cls.die_point,
+                )
+                .where(cls.website == website)
+                .order_by(desc(cls.create_time))
+                .limit(limit)
+            )
+            result = (await session.execute(stmt)).scalars().all()
             if result:
                 return result
             return None
