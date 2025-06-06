@@ -52,6 +52,7 @@ async def zhuque_ydx_manual_bet(bet_amount: int, flag: str, message: Message):
     """
     user_app = get_user_app()
     rele_betbouns = 0
+    bankrupt = False
     # 可选下注按钮金额，从大到小排列
     bet_values = [50_000_000, 5_000_000, 1_000_000, 250_000, 50_000, 20_000, 2_000, 500]
     bet_counts = []
@@ -79,24 +80,32 @@ async def zhuque_ydx_manual_bet(bet_amount: int, flag: str, message: Message):
                     chat_id=message.chat.id,
                     message_id=message.id,
                     callback_data=callback_data,
+                    timeout=5
                 )
                 logger.debug(f"下注结果: {result_message.message}")
 
                 if "零食不足" in result_message.message:
                     logger.warning(f"零食不足，尝试降一档下注")
+                    bankrupt = True
                     break
                 else:
                     rele_betbouns += bet_value
-                    await asyncio.sleep(1)
+                    bankrupt = False
+
+
+                await asyncio.sleep(1)
+                    
+            except TimeoutError:
+                logger.warning("CallbackAnswer 超时，可能是 Telegram 卡顿或 query 已失效")
 
             except Exception as e:
                 logger.exception(f"下注出错：{e}")
                 await asyncio.sleep(1)
 
     logger.info(f"总下注成功金额: {rele_betbouns}")
-    if rele_betbouns == 0:
+    if rele_betbouns == 0 and bankrupt:
         await user_app.send_message(message.chat.id, "破产了，下注失败")
-        state_manager.set_section("ZHUQUE", {"ydx_dice_bet": "off"})
+        state_manager.set_section(SITE_NAME.upper(), {"ydx_dice_bet": "off"})
 
 
 ############检查自己的id是否押注或是否中奖###############################################
@@ -245,12 +254,12 @@ async def zhuque_ydx_dice_reveal(client: Client, message: Message):
 )
 async def zhuque_ydx_new_round(client: Client, message: Message):
     bot_app = get_bot_app()
-    ydx_dice_bet = state_manager.get_item("ZHUQUE", "ydx_dice_bet", "off")
-    ydx_wwd_switch = state_manager.get_item("ZHUQUE", "ydx_wwd_switch", "off")
-    start_coun = int(state_manager.get_item("ZHUQUE", "ydx_start_count", 5))
-    stop_count = int(state_manager.get_item("ZHUQUE", "ydx_stop_count", 5))
-    bet_model = state_manager.get_item("ZHUQUE", "ydx_bet_model", "a")
-    start_bouns = int(state_manager.get_item("ZHUQUE", "ydx_start_bouns", 500))
+    ydx_dice_bet = state_manager.get_item(SITE_NAME.upper(), "ydx_dice_bet", "off")
+    ydx_wwd_switch = state_manager.get_item(SITE_NAME.upper(), "ydx_wwd_switch", "off")
+    start_coun = int(state_manager.get_item(SITE_NAME.upper(), "ydx_start_count", 5))
+    stop_count = int(state_manager.get_item(SITE_NAME.upper(), "ydx_stop_count", 5))
+    bet_model = state_manager.get_item(SITE_NAME.upper(), "ydx_bet_model", "a")
+    start_bouns = int(state_manager.get_item(SITE_NAME.upper(), "ydx_start_bouns", 500))
 
     if ydx_dice_bet == "off":
         return
@@ -291,6 +300,7 @@ async def zhuque_ydx_models(
     # 自动下注次数
     bet_count = bet_model.fail_count - start_count
     should_bet = 0 <= bet_count <= stop_count and bet_side is not None
+    
     if should_bet:
         # 等比下注公式：Sn = a(n² + n) + a
         # 1000 * (2 ** (n + 1) - 1)

@@ -55,12 +55,20 @@ async def get_redpocket_gen(client: Client, message: Message):
     for retry_times in range(MAX_RETRY):
         try:
             result_message = await client.request_callback_answer(
-                message.chat.id, message.id, callback_data
+                chat_id=message.chat.id,
+                message_id=message.id,
+                callback_data=callback_data,
+                timeout=5        
             )
+            
+                    
+        except TimeoutError:
+            logger.warning("CallbackAnswer 超时，可能是 Telegram 卡顿或 query 已失效")
+            
         except Exception as e:
             logger.exception(f"第 {retry_times + 1} 次提交失败: 请求回调异常: {e}")
             return  # 退出重试（你可以选择改为 `continue` 来忽略单次失败）
-
+        
         # 匹配抢红包成功的消息
         match = re.search(r"已获得 (\d+) 灵石", result_message.message)
         if match:
