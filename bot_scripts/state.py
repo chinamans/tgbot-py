@@ -27,3 +27,4 @@ async def sysstate(client: Client, message: Message):
     project_name, tgbot_sate = await system_version_get()
     await message.reply(tgbot_sate)
     
+    

@@ -107,6 +107,10 @@ BOT_COMMANDS: list[tuple[BotCommand, list[CommandScope]]] = [
         BotCommand("sysstate", "查看当前登录状态"),
         [CommandScope.PRIVATE_CHATS],
     ),
+        (
+        BotCommand("export", "数据库导出文件"),
+        [CommandScope.PRIVATE_CHATS],
+    ),
     (
         BotCommand("scheduler_jobs", "查询定时任务"),
         [CommandScope.PRIVATE_CHATS],
