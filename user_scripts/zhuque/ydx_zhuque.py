@@ -289,6 +289,8 @@ async def history_list(message: Message):
 async def zhuque_ydx_models(
     start_count, stop_count, start_bonus, message: Message, model="a"
 ):
+    # 延迟五秒等待手动操作
+    await asyncio.sleep(5)
     opposite_map = "sb"
     # 通过bet_models获取下注方向 0,1
     bet_model = bet_models[model.lower()]
