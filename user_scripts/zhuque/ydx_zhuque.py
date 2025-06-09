@@ -80,7 +80,7 @@ async def zhuque_ydx_manual_bet(bet_amount: int, flag: str, message: Message):
                     chat_id=message.chat.id,
                     message_id=message.id,
                     callback_data=callback_data,
-                    timeout=5
+                    timeout=5,
                 )
                 logger.debug(f"下注结果: {result_message.message}")
 
@@ -92,11 +92,12 @@ async def zhuque_ydx_manual_bet(bet_amount: int, flag: str, message: Message):
                     rele_betbouns += bet_value
                     bankrupt = False
 
-
                 await asyncio.sleep(1)
-                    
+
             except TimeoutError:
-                logger.warning("CallbackAnswer 超时，可能是 Telegram 卡顿或 query 已失效")
+                logger.warning(
+                    "CallbackAnswer 超时，可能是 Telegram 卡顿或 query 已失效"
+                )
 
             except Exception as e:
                 logger.exception(f"下注出错：{e}")
@@ -300,10 +301,9 @@ async def zhuque_ydx_models(
     # 0,1 转为 s,b
     bet_side = opposite_map[dx]
     # 自动下注次数
-    bet_count = bet_model.fail_count - start_count
-    should_bet = 0 <= bet_count <= stop_count and bet_side is not None
-    
-    if should_bet:
+    bet_count = bet_model.get_bet_count(data, start_count, stop_count)
+
+    if bet_count > -1:
         # 等比下注公式：Sn = a(n² + n) + a
         # 1000 * (2 ** (n + 1) - 1)
         bet_bonus = start_bonus * (2 ** (bet_count + 1) - 1)

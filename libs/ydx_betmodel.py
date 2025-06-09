@@ -1,6 +1,8 @@
 from abc import ABC, abstractmethod
 import random
 
+from app import logger
+
 
 class BetModel(ABC):
     fail_count: int = 0
@@ -50,6 +52,27 @@ class BetModel(ABC):
                 self.fail_count = 0
             else:
                 self.fail_count += 1
+
+    def get_consecutive_count(self, data: list[int]):
+        if not data:
+            return 0
+        last = data[-1]
+        count = 1
+        for v in reversed(data):
+            if v == last:
+                count += 1
+            else:
+                break
+        dx = "大小"
+        logger.info(f"连{dx[last]} [{count}]次")
+        return count
+
+    def get_bet_count(self, data: list[int], start_count=0, stop_count=0):
+        consecutive_count = self.get_consecutive_count(data)
+        bet_count = consecutive_count - start_count
+        if 0 <= bet_count <= stop_count:
+            return bet_count
+        return -1
 
 
 class A(BetModel):
