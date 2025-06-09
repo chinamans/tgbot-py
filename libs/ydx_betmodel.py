@@ -86,6 +86,7 @@ class B(BetModel):
         self.guess_dx = data[-1]
         return self.guess_dx
 
+
 class E(BetModel):
     def guess(self, data):
         if self.guess_dx == -1:
@@ -95,7 +96,7 @@ class E(BetModel):
         return self.guess_dx
 
 
-models: dict[str, BetModel] = {"a": A(), "b": B(), "c": C(), "d": D(), "e": E()}
+models: dict[str, BetModel] = {"a": A(), "b": B(), "e": E()}
 
 
 def test(data: list[int]):
