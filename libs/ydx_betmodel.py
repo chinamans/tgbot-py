@@ -57,13 +57,13 @@ class BetModel(ABC):
         if not data:
             return 0
         last = data[-1]
-        count = 1
+        count = 0
         for v in reversed(data):
             if v == last:
                 count += 1
             else:
                 break
-        dx = "大小"
+        dx = "小大"
         logger.info(f"连{dx[last]} [{count}]次")
         return count
 
@@ -85,19 +85,6 @@ class B(BetModel):
     def guess(self, data):
         self.guess_dx = data[-1]
         return self.guess_dx
-
-
-class C(BetModel):
-    def guess(self, data):
-        self.guess_dx = 1
-        return self.guess_dx
-
-
-class D(BetModel):
-    def guess(self, data):
-        self.guess_dx = 0
-        return self.guess_dx
-
 
 class E(BetModel):
     def guess(self, data):
