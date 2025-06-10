@@ -70,7 +70,7 @@ class BetModel(ABC):
     def get_bet_count(self, data: list[int], start_count=0, stop_count=0):
         consecutive_count = self.get_consecutive_count(data)
         bet_count = consecutive_count - start_count
-        if 0 <= bet_count <= stop_count:
+        if 0 <= bet_count < stop_count:
             return bet_count
         return -1
 
