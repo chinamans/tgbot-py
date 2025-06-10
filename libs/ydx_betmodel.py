@@ -88,7 +88,7 @@ class B(BetModel):
     def get_bet_count(self, data: list[int], start_count=0, stop_count=0):
         count=super().get_bet_count(data, start_count, stop_count)
         if count >= 0:
-            return self.fail_count
+            return min(self.fail_count,count)
         return -1
 
 class E(BetModel):
@@ -101,7 +101,7 @@ class E(BetModel):
     def get_bet_count(self, data: list[int], start_count=0, stop_count=0):
         count=super().get_bet_count(data, start_count, stop_count)
         if count >= 0:
-            return self.fail_count
+            return min(self.fail_count,count)
         return -1
 
 
