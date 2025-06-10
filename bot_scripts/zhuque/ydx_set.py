@@ -20,16 +20,18 @@ from libs.ydx_betmodel import models as bet_models
 
 
 class Method(Enum):
-    DICE_REVEAL = ("ydx_dice_reveal", "结果记录开关")
-    DICE_BET = ("ydx_dice_bet", "自动下注开关")
-    START_COUNT = ("ydx_start_count", "几连开始下注")
-    STOP_COUNT = ("ydx_stop_count", "连续下注几次")
-    START_BOUNS = ("ydx_start_bouns", "起手倍投金额")
-    BET_MODEL = ("ydx_bet_model", "下注模式")
+    DICE_REVEAL = ("ydx_dice_reveal", "结果记录开关","toggle")
+    DICE_BET = ("ydx_dice_bet", "自动下注开关","toggle")
+    START_COUNT = ("ydx_start_count", "几连开始下注", "select",[1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
+    STOP_COUNT = ("ydx_stop_count", "连续下注几次", "select",[1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
+    START_BOUNS = ("ydx_start_bouns", "起手金额","input")
+    BET_MODEL = ("ydx_bet_model", "下注模式", "select",bet_models.keys())
 
-    def __init__(self, code, message):
+    def __init__(self, code, message,func_type, options=None):
         self.code = code
         self.message = message
+        self.func_type = func_type
+        self.options = options
 
 
 @Client.on_message(filters.chat(MY_TGID) & filters.command("ydx"))
@@ -100,7 +102,7 @@ def init_inline_button(method: Method, default_state="off"):
 
     return InlineKeyboardButton(
         f"{method.message}：{string_state}",
-        callback_data=json.dumps({"toggle": method.code, "action": "ydxb"}),
+        callback_data=json.dumps({"func":method.func_type, "key": method.code, "action": "ydxb"}),
     )
 
 
@@ -144,18 +146,50 @@ class CallbackDataFromFilter(Filter):
 async def ydxb_toggle_callback(client: Client, callback_query: CallbackQuery):
     try:
         data = json.loads(callback_query.data)
-        toggle_key = data.get("toggle")
-        current = state_manager.get_item("ZHUQUE",toggle_key, "off")
-        new_state = "off" if current == "on" else "on"
+        match data.get("func"):
+            case "toggle":
+                # 切换开关状态
+                toggle_key = data.get("key")
+                current = state_manager.get_item("ZHUQUE", toggle_key, "off")
+                new_state = "off" if current == "on" else "on"
 
-        # 更新状态
-        state_manager.set_section("ZHUQUE", {toggle_key: new_state})
-        await callback_query.answer(
-            f"{'已开启' if new_state == 'on' else '已关闭'}", show_alert=False
-        )
-        await callback_query.edit_message_reply_markup(
-            reply_markup=init_inline_keyboard()
-        )
+                # 更新状态
+                state_manager.set_section("ZHUQUE", {toggle_key: new_state})
+                await callback_query.answer(
+                    f"{'已开启' if new_state == 'on' else '已关闭'}", show_alert=False
+                )
+                await callback_query.edit_message_reply_markup(
+                    reply_markup=init_inline_keyboard()
+                )
+            case "select":
+                # 选择模式
+                select_key = data.get("key")
+                options = Method[select_key].options
+                selected_value = data.get("value")
+
+                if selected_value not in options:
+                    await callback_query.answer("无效选项", show_alert=True)
+                    return
+
+                state_manager.set_section("ZHUQUE", {select_key: selected_value})
+                await callback_query.answer(f"已设置为：{selected_value}", show_alert=False)
+                await callback_query.edit_message_reply_markup(
+                    reply_markup=init_inline_keyboard()
+                )
+            case "input":
+                # 输入模式
+                input_key = data.get("key")
+                input_value = data.get("value")
+
+                if not input_value.isdigit():
+                    await callback_query.answer("请输入有效数字", show_alert=True)
+                    return
+
+                state_manager.set_section("ZHUQUE", {input_key: input_value})
+                await callback_query.answer(f"已设置为：{input_value}", show_alert=False)
+                await callback_query.edit_message_reply_markup(
+                    reply_markup=init_inline_keyboard()
+                )
 
     except Exception as e:
         await callback_query.answer("操作失败", show_alert=True)
