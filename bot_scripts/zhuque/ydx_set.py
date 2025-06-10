@@ -145,18 +145,11 @@ async def ydxb_toggle_callback(client: Client, callback_query: CallbackQuery):
     try:
         data = json.loads(callback_query.data)
         toggle_key = data.get("toggle")
-        if toggle_key not in ("dice_reveal", "dice_bet"):
-            await callback_query.answer("无效操作", show_alert=True)
-            return
-
-        # 获取当前状态
-        section = state_manager.get_section("ZHUQUE")
-        state_key = f"ydx_{toggle_key}"
-        current = section.get(state_key, "off")
+        current = state_manager.get_item("ZHUQUE",toggle_key, "off")
         new_state = "off" if current == "on" else "on"
 
         # 更新状态
-        state_manager.set_section("ZHUQUE", {state_key: new_state})
+        state_manager.set_section("ZHUQUE", {toggle_key: new_state})
         await callback_query.answer(
             f"{'已开启' if new_state == 'on' else '已关闭'}", show_alert=False
         )
