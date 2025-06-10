@@ -85,7 +85,11 @@ class B(BetModel):
     def guess(self, data):
         self.guess_dx = data[-1]
         return self.guess_dx
-
+    def get_bet_count(self, data: list[int], start_count=0, stop_count=0):
+        count=super().get_bet_count(data, start_count, stop_count)
+        if count >= 0:
+            return self.fail_count
+        return -1
 
 class E(BetModel):
     def guess(self, data):
@@ -94,6 +98,11 @@ class E(BetModel):
         if self.fail_count % 2 == 0:
             self.guess_dx = random.randint(0, 1)
         return self.guess_dx
+    def get_bet_count(self, data: list[int], start_count=0, stop_count=0):
+        count=super().get_bet_count(data, start_count, stop_count)
+        if count >= 0:
+            return self.fail_count
+        return -1
 
 
 models: dict[str, BetModel] = {"a": A(), "b": B(), "e": E()}
