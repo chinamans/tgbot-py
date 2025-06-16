@@ -1,5 +1,11 @@
+# 系统库
+import json
+
+# 第三方库
+from pyrogram.types import CallbackQuery
 from pyrogram.types.messages_and_media import Message
 from pyrogram.filters import create
+from pyrogram.filters import Filter
 
 
 async def reply_to_me_filter(_, __, m: Message):
@@ -66,3 +72,15 @@ hddobly_bot = create_bot_filter(6474948384)
 yyz_bot = create_bot_filter(6296776523)
 audiences_bot = create_bot_filter(2053736484)
 cmct_bot = create_bot_filter(752250569)
+
+
+class CallbackDataFromFilter(Filter):
+    def __init__(self, from_value):
+        self.from_value = from_value
+
+    async def __call__(self, client, callback_query: CallbackQuery):
+        try:
+            data = json.loads(callback_query.data)
+        except Exception:
+            return False
+        return data.get("a") == self.from_value

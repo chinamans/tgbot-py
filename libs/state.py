@@ -14,6 +14,7 @@ class StateManager:
     """
     状态管理器，负责读取、写入和操作状态数据。
     """
+
     def __init__(self, path=state_path):
         self.path = path
         self.state = self._read_state_from_file()
@@ -58,11 +59,12 @@ class StateManager:
         self.state[key] = value
         self.write_state()
 
-    def get_section(self, section: str, default=None):
+    def get_section(self, section: str, default={}) -> dict:
         """
         获取指定表头（section）的数据
         """
         return self.state.get(section, default)
+
     def get_item(self, section: str, key: str, default=None):
         """
         获取指定表头下的某个键的值
@@ -80,6 +82,7 @@ class StateManager:
         安全更新指定表头的数据，写入文件
         """
         current_section = deepcopy(self.state.get(section, {}))
+
         # 深度合并
         def deep_merge(d1, d2):
             for k, v in d2.items():
@@ -94,6 +97,20 @@ class StateManager:
         toml.toml_write_section(section, section_data, self.path)
         # 重新读取保证同步
         self.read_state()
+
+    def toggle_item(self, section: str, key: str) -> None:
+        """
+        切换指定表头下的某个键的值
+        Args:
+            section (str): 表头名（一级键）
+            key (str): 项目名（二级键）
+        """
+        current_value = self.get_item(section, key, "off")
+        if current_value not in ["on", "off"]:
+            raise ValueError(f"Invalid value for {section}.{key}: {current_value}")
+        new_value = "on" if current_value == "off" else "off"
+        self.set_section(section, {key: new_value})
+        return new_value
 
 
 # 实例化全局状态管理对象
