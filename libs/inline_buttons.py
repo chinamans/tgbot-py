@@ -14,6 +14,7 @@ from pyrogram.types import (
 from pyrogram.handlers import MessageHandler
 
 # 自定义模块
+from app import get_bot_app
 from config.config import MY_TGID
 from libs.state import state_manager
 
@@ -132,16 +133,34 @@ class InlineButton:
         method: Method = self.get_global("method")
         cb: CallbackQuery = self.get_global("cb")
         if not method or not cb:
+            self.remove_handler()
             return
+        options = method.options
         value = message.text.strip()
+        if "valid_int" in options:
+            min_int, max_int = options["valid_int"]
+            try:
+                v_int = int(value)
+                if v_int > max_int or v_int < min_int:
+                    raise ValueError(f"请输入{min_int}-{max_int}之间的数字")
+            except Exception as e:
+                return await message.reply(str(e))
+        if "length_str" in options:
+            length_str = options["length_str"]
+            try:
+                if len(value) > length_str:
+                    raise ValueError(f"请输入{length_str}个字符以内的字符串")
+            except Exception as e:
+                return await message.reply(str(e))
         state_manager.set_section(self.section, {method.name: value})
         await cb.edit_message_text(
             self.main_message(),
             reply_markup=self.main_keyboard(),
         )
+        self.remove_handler()
 
     def input_message(self, method: Method, timeout=30):
-        return f"{self.message}：\n {method.message} 请在{timeout}秒内输入值：\n{method.options}"
+        return f"{self.message}：\n {method.message} 请在{timeout}秒内输入值：\n{method.options.get("description","") if method.options else ""}"
 
     def select_message(self, method: Method):
         return f"{self.message}：\n {method.message} 请选择："
@@ -149,14 +168,26 @@ class InlineButton:
     def main_message(self):
         return f"{self.message}："
 
+    async def add_handler(self, timeout=30):
+        bot_app = get_bot_app()
+        self.handler = bot_app.add_handler(
+            MessageHandler(self.input, filters.chat(MY_TGID) & filters.text)
+        )
+        await asyncio.sleep(timeout)
+        self.remove_handler()
 
-async def add_handler(client: Client, handler_func, timeout=30):
-    # 删除输入处理器
-    handler = client.add_handler(
-        MessageHandler(handler_func, filters.chat(MY_TGID) & filters.text)
-    )
-    await asyncio.sleep(timeout)
-    client.remove_handler(*handler)
+    def remove_handler(self):
+        if "method" in self.g:
+            del self.g["method"]
+        if "cb" in self.g:
+            del self.g["cb"]
+        bot_app = get_bot_app()
+        try:
+            if self.handler:
+                bot_app.remove_handler(*self.handler)
+                self.handler = None
+        except Exception as e:
+            pass
 
 
 async def inline_button_callback(
@@ -189,7 +220,7 @@ async def inline_button_callback(
                 inline_button.input_message(method, timeout),
                 reply_markup=inline_button.input_keyboard(),
             )
-            asyncio.create_task(add_handler(client, inline_button.input, timeout))
+            asyncio.create_task(inline_button.add_handler(timeout))
         case "back":
             await callback_query.edit_message_text(
                 inline_button.main_message(),

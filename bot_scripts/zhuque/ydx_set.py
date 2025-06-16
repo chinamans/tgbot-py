@@ -36,7 +36,15 @@ class Ydx(Method):
         "select",
         [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
     )
-    ydx_start_bouns = (auto(), "起手金额", "input")
+    ydx_start_bouns = (
+        auto(),
+        "起手金额",
+        "input",
+        {
+            "description": "请输入任意整数500-50000000",
+            "valid_int": [500, 50000000],
+        },  # valid_init\length_str
+    )
     ydx_bet_model = (auto(), "下注模式", "select", list(bet_models.keys()))
 
 
