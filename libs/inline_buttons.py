@@ -19,20 +19,11 @@ from libs.state import state_manager
 
 
 class Method(Enum):
-
-    def __init__(self, code, key, message, func_type, options=None):
+    def __init__(self, code, message, func_type, options=None):
         self.code = code
-        self.key = key
         self.message = message
         self.func_type = func_type
         self.options = options
-
-    @classmethod
-    def from_key(cls, key):
-        for method in cls:
-            if method.value[1] == key:
-                return method
-        return None
 
     @classmethod
     def from_code(cls, code):
@@ -41,7 +32,7 @@ class Method(Enum):
         if not isinstance(code, int):
             raise ValueError("Code must be an integer.")
         for method in cls:
-            if method.value[0] == code:
+            if method.code == code:
                 return method
         return None
 
@@ -54,6 +45,9 @@ class InlineButton:
         self.action = action
         self.message = message
         self.state_section = state_manager.get_section(section, {})
+
+    def set_main_keyboard(self, keyboard):
+        self.main_keyboard = keyboard
 
     def create_button(self, method: Method, default_state=None):
         if method.func_type not in ["toggle", "select", "input"]:
@@ -122,8 +116,8 @@ class InlineButton:
             return InlineKeyboardMarkup(keyboard)
         return None
 
-    def input_keyboard(self, method: Method):
-        keyboard = [self.back_button(), self.close_button()]
+    def input_keyboard(self):
+        keyboard = [[self.back_button(), self.close_button()]]
         return InlineKeyboardMarkup(keyboard)
 
     def set_global(self, key, value):
@@ -140,12 +134,14 @@ class InlineButton:
         if not method or not cb:
             return
         value = message.text.strip()
-        state_manager.set_section(self.section, {method.code: value})
-        await cb.answer(f"已设置为：{value}", show_alert=False)
-        await cb.edit_message_reply_markup(reply_markup=self.select_keyboard(method))
+        state_manager.set_section(self.section, {method.name: value})
+        await cb.edit_message_text(
+            self.main_message(),
+            reply_markup=self.main_keyboard(),
+        )
 
     def input_message(self, method: Method, timeout=30):
-        return f"{self.message}：\n {method.message} 请在{timeout}秒内输入值："
+        return f"{self.message}：\n {method.message} 请在{timeout}秒内输入值：\n{method.options}"
 
     def select_message(self, method: Method):
         return f"{self.message}：\n {method.message} 请选择："
@@ -169,47 +165,47 @@ async def inline_button_callback(
     inline_button=InlineButton,
     Method_class=Method,
 ):
-    try:
-        data: dict = json.loads(callback_query.data)
-        code = data.get("c", None)
-        function_type = data.get("f")
-        method = Method_class.from_code(code)
-        match function_type:
-            case "toggle":
-                state_manager.toggle_item(inline_button.section, method.name)
-                await callback_query.edit_message_reply_markup(
-                    reply_markup=inline_button.get_global("main")()
-                )
-            case "select":
-                await callback_query.edit_message_text(
-                    inline_button.select_message(method),
-                    reply_markup=inline_button.select_keyboard(method),
-                )
-            case "input":
-                inline_button.set_global("method", method)
-                inline_button.set_global("cb", callback_query)
-                timeout = 30
-                await callback_query.edit_message_text(
-                    inline_button.input_message(method, timeout),
-                    reply_markup=inline_button.input_keyboard(method),
-                )
-                asyncio.create_task(add_handler(client, inline_button.input, timeout))
-            case "back":
-                await callback_query.edit_message_text(
-                    inline_button.main_message(),
-                    reply_markup=inline_button.get_global("main")(),
-                )
-            case "close":
-                await callback_query.message.delete()
-            case "sv":
-                value = data.get("v")
-                if method:
-                    state_manager.set_section(
-                        inline_button.section, {method.code: value}
-                    )
-                await callback_query.edit_message_text(
-                    inline_button.main_message(),
-                    reply_markup=inline_button.input_keyboard(method),
-                )
-    except Exception as e:
-        await callback_query.answer("操作失败", show_alert=True)
+    # try:
+    data: dict = json.loads(callback_query.data)
+    code = data.get("c", None)
+    function_type = data.get("f")
+    method = Method_class.from_code(code)
+    match function_type:
+        case "toggle":
+            state_manager.toggle_item(inline_button.section, method.name)
+            await callback_query.edit_message_reply_markup(
+                reply_markup=inline_button.main_keyboard()
+            )
+        case "select":
+            await callback_query.edit_message_text(
+                inline_button.select_message(method),
+                reply_markup=inline_button.select_keyboard(method),
+            )
+        case "input":
+            inline_button.set_global("method", method)
+            inline_button.set_global("cb", callback_query)
+            timeout = 30
+            await callback_query.edit_message_text(
+                inline_button.input_message(method, timeout),
+                reply_markup=inline_button.input_keyboard(),
+            )
+            asyncio.create_task(add_handler(client, inline_button.input, timeout))
+        case "back":
+            await callback_query.edit_message_text(
+                inline_button.main_message(),
+                reply_markup=inline_button.main_keyboard(),
+            )
+        case "close":
+            await callback_query.message.delete()
+        case "sv":
+            value = data.get("v")
+            if method:
+                state_manager.set_section(inline_button.section, {method.name: value})
+            await callback_query.edit_message_text(
+                inline_button.main_message(),
+                reply_markup=inline_button.main_keyboard(),
+            )
+
+
+# except Exception as e:
+#     await callback_query.answer("操作失败", show_alert=True)
