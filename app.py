@@ -14,6 +14,7 @@ from pyrogram.errors import (
     Unauthorized,
     AuthKeyInvalid,
 )
+from pyrogram.session import Session
 from pyrogram.raw.core import TLObject
 
 # 自定义模块
@@ -26,59 +27,60 @@ from schedulers import scheduler, start_scheduler
 
 
 class Client(_Client):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    async def start(self):
+        """
+        重写 start 方法，在会话认证后设置 CustomSession。
+        """
+        await super().start()
+        # 确保 auth_key 和 dc_id 可用
+        self.original_invoke = self.session.invoke
+        self.session.invoke = self.custom_invoke
 
-    async def invoke(self, query: TLObject, *args, max_retries: int = 3, **kwargs):
-        """
-        重写 invoke 方法，捕获特定错误并触发 Supervisor 重启。
-        """
+    async def custom_invoke(self, query, *args, max_retries: int = 3, **kwargs):
         retries = 0
         while retries < max_retries:
             try:
                 logger.debug(
-                    f"Invoking {query.__class__.__name__} (Attempt {retries + 1}/{max_retries})"
+                    f"调用 {query.__class__.__name__} (尝试 {retries + 1}/{max_retries})"
                 )
-                response = await super().invoke(query, *args, **kwargs)
-                logger.info(f"Request {query.__class__.__name__} succeeded")
+                response = await self.original_invoke(query, *args, **kwargs)
+                logger.debug(f"请求 {query.__class__.__name__} 成功")
                 return response
             except FloodWait as e:
                 wait_time = e.value
                 logger.warning(
-                    f"FloodWait: Waiting {wait_time} seconds for {query.__class__.__name__}"
+                    f"FloodWait: 为 {query.__class__.__name__} 等待 {wait_time} 秒"
                 )
                 await asyncio.sleep(wait_time)
                 retries += 1
-            except TimeoutError as e:
+            except asyncio.TimeoutError as e:
                 logger.error(
                     f"TimeoutError for {query.__class__.__name__}: {traceback.format_exc()}"
                 )
-                await asyncio.sleep(1)  # 避免快速重试
+                await asyncio.sleep(1)
                 retries += 1
             except RPCError as e:
                 logger.error(
                     f"RPCError for {query.__class__.__name__}: {traceback.format_exc()}"
                 )
-                # 某些错误不应重试，直接抛出
                 if isinstance(e, (Unauthorized, AuthKeyInvalid)):
                     raise
                 await asyncio.sleep(1)
                 retries += 1
             except Exception as e:
                 logger.error(
-                    f"Unexpected error for {query.__class__.__name__}: {traceback.format_exc()}"
+                    f"意外错误 for {query.__class__.__name__}: {traceback.format_exc()}"
                 )
-                raise  # 不重试未知错误
+                raise
 
         logger.critical(
-            f"Max retries ({max_retries}) exceeded for {query.__class__.__name__}. Triggering Supervisor restart."
+            f"超过最大重试次数 ({max_retries}) for {query.__class__.__name__}。触发 Supervisor 重启。"
         )
         try:
-            # 尝试关闭会话
             await self.stop()
         except Exception as e:
-            logger.error(f"Failed to stop session: {traceback.format_exc()}")
-        sys.exit(1)  # 触发 Supervisor 重启
+            logger.error(f"关闭会话失败: {traceback.format_exc()}")
+        sys.exit(1)
 
 
 user_app_terminated = False
