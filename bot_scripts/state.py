@@ -25,8 +25,3 @@ async def configstate(client: Client, message: Message):
 async def sysstate(client: Client, message: Message):
     project_name, tgbot_sate = await system_version_get()
     await message.reply(tgbot_sate)
-
-
-@Client.on_message(filters.chat(MY_TGID) & filters.command("err"))
-async def sysstate(client: Client, message: Message):
-    await client.send_message(-999999999999, "测试 custom_invoke 错误捕获")
