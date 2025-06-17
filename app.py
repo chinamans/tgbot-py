@@ -14,8 +14,6 @@ from pyrogram.errors import (
     Unauthorized,
     AuthKeyInvalid,
 )
-from pyrogram.session import Session
-from pyrogram.raw.core import TLObject
 
 # 自定义模块
 from config.config import API_HASH, API_ID, BOT_TOKEN, PT_GROUP_ID, proxy_set
@@ -71,6 +69,7 @@ class Client(_Client):
                 logger.error(
                     f"意外错误 for {query.__class__.__name__}: {traceback.format_exc()}"
                 )
+                retries += 1
                 raise
 
         logger.critical(
