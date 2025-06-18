@@ -10,7 +10,6 @@ from app import get_bot_app
 from libs.log import logger
 
 
-
 ADMINS: dict[str, pyrogram.types.User] = {}
 
 
@@ -19,6 +18,10 @@ class CommandScope(Enum):
 
 
 BOT_COMMANDS: list[tuple[BotCommand, list[CommandScope]]] = [
+    (
+        BotCommand("start", "基础设置"),
+        [CommandScope.PRIVATE_CHATS],
+    ),
     (
         BotCommand("helpme", "查看帮助信息"),
         [CommandScope.PRIVATE_CHATS],
@@ -34,11 +37,11 @@ BOT_COMMANDS: list[tuple[BotCommand, list[CommandScope]]] = [
     (
         BotCommand("dajie", "朱雀dajie相关设置"),
         [CommandScope.PRIVATE_CHATS],
-    ),  
+    ),
     (
         BotCommand("blacklist", "朱雀dajie不予返现黑名设置"),
         [CommandScope.PRIVATE_CHATS],
-    ),        
+    ),
     (
         BotCommand("ydx", "朱雀ydx菠菜自动投注设置"),
         [CommandScope.PRIVATE_CHATS],
@@ -98,7 +101,7 @@ BOT_COMMANDS: list[tuple[BotCommand, list[CommandScope]]] = [
     (
         BotCommand("share115tocms", "share115tocms 启用开关"),
         [CommandScope.PRIVATE_CHATS],
-    ),    
+    ),
     (
         BotCommand("configstate", "查看当前参数状态"),
         [CommandScope.PRIVATE_CHATS],
@@ -107,7 +110,7 @@ BOT_COMMANDS: list[tuple[BotCommand, list[CommandScope]]] = [
         BotCommand("sysstate", "查看当前登录状态"),
         [CommandScope.PRIVATE_CHATS],
     ),
-        (
+    (
         BotCommand("export", "数据库导出文件"),
         [CommandScope.PRIVATE_CHATS],
     ),
@@ -116,6 +119,7 @@ BOT_COMMANDS: list[tuple[BotCommand, list[CommandScope]]] = [
         [CommandScope.PRIVATE_CHATS],
     ),
 ]
+
 
 async def setup_commands():
     bot_app = get_bot_app()

@@ -236,7 +236,3 @@ async def inline_button_callback(
                 inline_button.main_message(),
                 reply_markup=inline_button.main_keyboard(),
             )
-
-
-# except Exception as e:
-#     await callback_query.answer("操作失败", show_alert=True)

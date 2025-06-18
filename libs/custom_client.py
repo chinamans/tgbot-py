@@ -14,6 +14,7 @@ from pyrogram.errors import (
 
 # 自定义模块
 from libs.log import logger
+from libs.state import state_manager
 
 
 class Client(_Client):
@@ -70,4 +71,5 @@ class Client(_Client):
         logger.critical(
             f"超过最大重试次数 ({self._invoke_retries}) for {query.__class__.__name__}。触发 Supervisor 重启。"
         )
-        sys.exit(1)
+        if state_manager.get_item("BASIC", "auto_restart", "off") == "on":
+            sys.exit(1)
