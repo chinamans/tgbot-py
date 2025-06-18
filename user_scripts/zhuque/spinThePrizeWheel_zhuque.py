@@ -132,7 +132,6 @@ async def zhuque_ThePrizeWheel(client: Client, message: Message):
             )
              
         waiting = await message.reply("```\n抽奖中……```")
-
         stats = await spin_wheel(count, client, waiting)
         
     except Exception as e:
