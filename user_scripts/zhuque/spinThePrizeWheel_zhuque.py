@@ -78,7 +78,6 @@ async def spin_wheel(draws: int, client: Client, message: Message):
                     f"**明细如下：**\n{summary}"
                 ),
             )
-
     return stats
 
 
