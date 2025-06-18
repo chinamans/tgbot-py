@@ -37,14 +37,16 @@ async def spin_wheel(draws: int, client: Client, message: Message):
         "upload_in_gb": 0,
         "prize_counts": {k: 0 for k in PRIZES},
     }
+    batch_size = 500
+    tasks_count = int(state_manager.get_item("ZHUQUE", "prize_tasks", 4))
+
     lock = asyncio.Lock()
     start_time = time.time()
-    async with aiohttp.ClientSession() as session:
-        batch_size = 500
+    async with aiohttp.ClientSession() as session:        
         for i in range(0, draws, batch_size):
             sub_draws = min(batch_size, draws - i)
-            chunk = sub_draws // 4
-            extra = sub_draws % 4
+            chunk = sub_draws // tasks_count
+            extra = sub_draws % tasks_count
             tasks = [
                 fetch_batch(chunk + (1 if j < extra else 0), session, stats, lock)
                 for j in range(4)
