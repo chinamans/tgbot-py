@@ -1,22 +1,14 @@
 # 标准库
-import asyncio
 import os
 import json
 from pathlib import Path
-import sys
-import traceback
 
 # 第三方库
-from pyrogram import Client as _Client, idle
-from pyrogram.errors import (
-    RPCError,
-    FloodWait,
-    Unauthorized,
-    AuthKeyInvalid,
-)
+from pyrogram import idle
 
 # 自定义模块
 from config.config import API_HASH, API_ID, BOT_TOKEN, PT_GROUP_ID, proxy_set
+from libs.custom_client import Client
 from libs.log import logger
 from libs.sys_info import system_version_get
 from models import create_all, async_engine
@@ -24,64 +16,6 @@ from models.alter_tables import alter_columns
 from schedulers import scheduler, start_scheduler
 
 
-class Client(_Client):
-    async def start(self):
-        """
-        重写 start 方法，在会话认证后设置 CustomSession。
-        """
-        await super().start()
-        # 确保 auth_key 和 dc_id 可用
-        self.original_invoke = self.session.invoke
-        self.session.invoke = self.custom_invoke
-
-    async def custom_invoke(self, query, *args, max_retries: int = 3, **kwargs):
-        retries = 0
-        while retries < max_retries:
-            try:
-                logger.debug(
-                    f"调用 {query.__class__.__name__} (尝试 {retries + 1}/{max_retries})"
-                )
-                response = await self.original_invoke(query, *args, **kwargs)
-                logger.debug(f"请求 {query.__class__.__name__} 成功")
-                return response
-            except FloodWait as e:
-                wait_time = e.value
-                logger.warning(
-                    f"FloodWait: 为 {query.__class__.__name__} 等待 {wait_time} 秒"
-                )
-                await asyncio.sleep(wait_time)
-                retries += 1
-            except asyncio.TimeoutError as e:
-                logger.error(f"TimeoutError for {query.__class__.__name__}")
-                await asyncio.sleep(1)
-                retries += 1
-                if retries == max_retries:
-                    traceback.print_exc()
-            except RPCError as e:
-                logger.error(f"RPCError for {query.__class__.__name__}")
-                if isinstance(e, (Unauthorized, AuthKeyInvalid)):
-                    raise
-                await asyncio.sleep(1)
-                retries += 1
-                if retries == max_retries:
-                    traceback.print_exc()
-            except Exception as e:
-                logger.error(f"意外错误 for {query.__class__.__name__}")
-                retries += 1
-                if retries == max_retries:
-                    traceback.print_exc()
-
-        logger.critical(
-            f"超过最大重试次数 ({max_retries}) for {query.__class__.__name__}。触发 Supervisor 重启。"
-        )
-        try:
-            await self.stop()
-        except Exception as e:
-            logger.error(f"关闭会话失败: {traceback.format_exc()}")
-        sys.exit(1)
-
-
-user_app_terminated = False
 user_app: Client = None
 bot_app: Client = None
 
@@ -133,7 +67,7 @@ async def start_app():
     except Exception as e:
         logger.critical("bot_app 启动失败: %s", e)
         return
-    db_flag_data = None
+    db_flag_data: dict = None
     if os.path.exists(db_flag_path):
         try:
             with open(db_flag_path, "r", encoding="utf-8") as f:
