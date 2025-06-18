@@ -30,6 +30,7 @@ BONUS_VALUES = {1: 300000, 2: 100000, 3: 80000, 4: 30000}
 API_URL = "https://zhuque.in/api/gaming/spinThePrizeWheel"
 
 async def spin_wheel(draws: int, client: Client, message: Message):
+
     stats = {
         "cost": 0,
         "bonus_back": 0,
@@ -37,7 +38,7 @@ async def spin_wheel(draws: int, client: Client, message: Message):
         "prize_counts": {k: 0 for k in PRIZES},
     }
     lock = asyncio.Lock()
-
+    start_time = time.time()
     async with aiohttp.ClientSession() as session:
         batch_size = 500
         for i in range(0, draws, batch_size):
@@ -51,6 +52,7 @@ async def spin_wheel(draws: int, client: Client, message: Message):
             await asyncio.gather(*tasks)
 
             # 中途进度更新
+            elapsed = time.time() - start_time
             cost = stats["cost"]
             bonus_back = stats["bonus_back"]
             gb = stats["upload_in_gb"]
@@ -69,7 +71,7 @@ async def spin_wheel(draws: int, client: Client, message: Message):
                 message.id,
                 (
                     f"**抽奖进度：**\n"
-                    f"已完成 {i + sub_draws}/{draws} 次\n"
+                    f"已完成 {i + sub_draws}/{draws} 次  耗时：{elapsed:.3f} 秒\n"
                     f"**上传灵石比：** {efficiency:.2f} GB/万灵石\n"
                     f"按86.98 GB/万灵石计算净赚：{net_loss:.1f}\n\n"
                     f"耗费灵石 : **{cost}**\n"
@@ -80,32 +82,6 @@ async def spin_wheel(draws: int, client: Client, message: Message):
             )
     return stats
 
-
-
-
-
-"""
-async def spin_wheel(draws: int):
-
-    stats = {
-        "cost": 0,
-        "bonus_back": 0,
-        "upload_in_gb": 0,
-        "prize_counts": {k: 0 for k in PRIZES},
-    }
-    lock = asyncio.Lock()
-
-    async with aiohttp.ClientSession() as session:
-        chunk = draws // 4
-        extra = draws % 4
-        tasks = [
-            fetch_batch(chunk + (1 if i < extra else 0), session, stats, lock)
-            for i in range(4)
-        ]
-        await asyncio.gather(*tasks)
-
-    return stats
-"""
 
 async def fetch_batch(count, session: aiohttp.ClientSession, stats, lock):
     cookie = state_manager.get_item(SITE_NAME.upper(),"cookie","")
@@ -154,43 +130,11 @@ async def zhuque_ThePrizeWheel(client: Client, message: Message):
             return await message.reply(
                 f"```\n现有灵石不足，最多可抽奖 {max_draw} 次```",
             )
-
-        start = time.time()
+             
         waiting = await message.reply("```\n抽奖中……```")
 
         stats = await spin_wheel(count, client, waiting)
-        elapsed = time.time() - start
-        cost, bonus_back, gb = stats["cost"], stats["bonus_back"], stats["upload_in_gb"]
-        net_loss = (gb / 86.9863 * 10000) - (cost - bonus_back)
-        efficiency = gb / max((cost - bonus_back), 1) * 10000
-
-        summary = (
-            "\n".join(
-                f"{PRIZES.get(k)} : {v}"
-                for k, v in stats["prize_counts"].items()
-                if v > 0
-            )
-            or "无"
-        )
-
-        await client.edit_message_text(
-            message.chat.id,
-            waiting.id,
-            (
-                f"**抽奖进度：**\n"
-                f"已完成 {count}/{count} 次 耗时：{elapsed:.3f} 秒\n"
-                f"**上传灵石比：** {efficiency:.2f} GB/万灵石\n"
-                f"按86.98 GB/万灵石计算净赚：{net_loss:.1f}\n\n"
-                f"耗费灵石 : **{cost}**\n"
-                f"道具回血 : **{int(bonus_back)}**\n"
-                f"获得上传 : **{gb} GB**\n\n"
-                f"**明细如下：**\n{summary}"
-            ),
-        )
-
-        if message.chat.id not in {MY_TGID, PT_GROUP_ID["BOT_MESSAGE_CHAT"]}:
-            await others.delete_message(message, 1)
-
+        
     except Exception as e:
         logger.exception("抽奖命令错误")
         await message.reply(f"发生异常: {e}")
