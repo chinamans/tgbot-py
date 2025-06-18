@@ -29,6 +29,60 @@ PRIZES = {
 BONUS_VALUES = {1: 300000, 2: 100000, 3: 80000, 4: 30000}
 API_URL = "https://zhuque.in/api/gaming/spinThePrizeWheel"
 
+async def spin_wheel(draws: int, client: Client, message: Message):
+    stats = {
+        "cost": 0,
+        "bonus_back": 0,
+        "upload_in_gb": 0,
+        "prize_counts": {k: 0 for k in PRIZES},
+    }
+    lock = asyncio.Lock()
+
+    async with aiohttp.ClientSession() as session:
+        batch_size = 500
+        for i in range(0, draws, batch_size):
+            sub_draws = min(batch_size, draws - i)
+            chunk = sub_draws // 4
+            extra = sub_draws % 4
+            tasks = [
+                fetch_batch(chunk + (1 if j < extra else 0), session, stats, lock)
+                for j in range(4)
+            ]
+            await asyncio.gather(*tasks)
+
+            # 中途进度更新
+            cost = stats["cost"]
+            bonus_back = stats["bonus_back"]
+            gb = stats["upload_in_gb"]
+            net_loss = (gb / 86.9863 * 10000) - (cost - bonus_back)
+            efficiency = gb / max((cost - bonus_back), 1) * 10000
+            summary = (
+                "\n".join(
+                    f"{PRIZES.get(k)} : {v}"
+                    for k, v in stats["prize_counts"].items()
+                    if v > 0
+                )
+                or "无"
+            )
+            await client.edit_message_text(
+                message.chat.id,
+                message.id,
+                (
+                    f"**抽奖进度：** 已完成 {i + sub_draws}/{draws} 次\n"
+                    f"上传灵石比：{efficiency:.2f} GB/万灵石\n"
+                    f"按86.98 GB/万灵石计算净赚：{net_loss:.1f}\n"
+                    f"耗费灵石 : {cost}，回血 : {int(bonus_back)}，上传 : {gb} GB\n"
+                    f"当前明细：\n{summary}"
+                ),
+            )
+
+    return stats
+
+
+
+
+
+"""
 async def spin_wheel(draws: int):
 
     stats = {
@@ -49,7 +103,7 @@ async def spin_wheel(draws: int):
         await asyncio.gather(*tasks)
 
     return stats
-
+"""
 
 async def fetch_batch(count, session: aiohttp.ClientSession, stats, lock):
     cookie = state_manager.get_item(SITE_NAME.upper(),"cookie","")
@@ -102,10 +156,10 @@ async def zhuque_ThePrizeWheel(client: Client, message: Message):
         start = time.time()
         waiting = await message.reply("```\n抽奖中……```")
 
-        stats = await spin_wheel(count)
+        stats = await spin_wheel(count, client, waiting)
         elapsed = time.time() - start
         cost, bonus_back, gb = stats["cost"], stats["bonus_back"], stats["upload_in_gb"]
-        net_loss = (cost - bonus_back) - (gb / 86.9863 * 10000)
+        net_loss = (gb / 86.9863 * 10000) - (cost - bonus_back)
         efficiency = gb / max((cost - bonus_back), 1) * 10000
 
         summary = (
@@ -123,7 +177,7 @@ async def zhuque_ThePrizeWheel(client: Client, message: Message):
             (
                 f"**抽奖完成：** 耗时：{elapsed:.3f} 秒\n"
                 f"**上传灵石比：** {efficiency:.2f} GB/万灵石\n"
-                f"按86.98 GB/万灵石计算净亏：{net_loss:.1f}\n\n"
+                f"按86.98 GB/万灵石计算净赚：{net_loss:.1f}\n\n"
                 f"耗费灵石 : **{cost}**\n"
                 f"道具回血 : **{int(bonus_back)}**\n"
                 f"获得上传 : **{gb} GB**\n\n"
