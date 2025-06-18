@@ -68,11 +68,14 @@ async def spin_wheel(draws: int, client: Client, message: Message):
                 message.chat.id,
                 message.id,
                 (
-                    f"**抽奖进度：** 已完成 {i + sub_draws}/{draws} 次\n"
-                    f"上传灵石比：{efficiency:.2f} GB/万灵石\n"
-                    f"按86.98 GB/万灵石计算净赚：{net_loss:.1f}\n"
-                    f"耗费灵石 : {cost}，回血 : {int(bonus_back)}，上传 : {gb} GB\n"
-                    f"当前明细：\n{summary}"
+                    f"**抽奖进度：**\n"
+                    f"已完成 {i + sub_draws}/{draws} 次\n"
+                    f"**上传灵石比：** {efficiency:.2f} GB/万灵石\n"
+                    f"按86.98 GB/万灵石计算净赚：{net_loss:.1f}\n\n"
+                    f"耗费灵石 : **{cost}**\n"
+                    f"道具回血 : **{int(bonus_back)}**\n"
+                    f"获得上传 : **{gb} GB**\n\n"
+                    f"**明细如下：**\n{summary}"
                 ),
             )
 
@@ -175,7 +178,8 @@ async def zhuque_ThePrizeWheel(client: Client, message: Message):
             message.chat.id,
             waiting.id,
             (
-                f"**抽奖完成：** 耗时：{elapsed:.3f} 秒\n"
+                f"**抽奖进度：**\n"
+                f"已完成 {count}/{count} 次 耗时：{elapsed:.3f} 秒\n"
                 f"**上传灵石比：** {efficiency:.2f} GB/万灵石\n"
                 f"按86.98 GB/万灵石计算净赚：{net_loss:.1f}\n\n"
                 f"耗费灵石 : **{cost}**\n"
