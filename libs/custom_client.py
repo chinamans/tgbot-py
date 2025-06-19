@@ -52,8 +52,6 @@ class Client(_Client):
                     traceback.print_exc()
                     await asyncio.sleep(1)
                     retries += 1
-                    if retries == self._invoke_retries:
-                        raise
 
                 except RPCError as e:
                     logger.error(f"RPCError for {query.__class__.__name__}")
@@ -66,7 +64,7 @@ class Client(_Client):
                 except Exception as e:
                     logger.error(f"意外错误 for {query.__class__.__name__}")
                     traceback.print_exc()
-                    raise
+                    retries += 1
 
         logger.critical(
             f"超过最大重试次数 ({self._invoke_retries}) for {query.__class__.__name__}。触发 Supervisor 重启。"
