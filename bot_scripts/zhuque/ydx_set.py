@@ -32,7 +32,7 @@ class Ydx(Method):
     )
     ydx_stop_count = (
         auto(),
-        "连续下注几次",
+        "最大追投次数",
         "select",
         [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
     )
