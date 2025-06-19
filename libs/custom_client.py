@@ -18,27 +18,15 @@ from libs.state import state_manager
 
 
 class Client(_Client):
-    async def start(self, *args, invoke_retries: int = 5, max_pool: int = 10, **kwargs):
+    async def start(self, *args, invoke_retries: int = 5, max_pool: int = 10, **kargs):
         """
         重写 start 方法，在会话认证后设置 CustomSession。
         """
-        await super().start(*args, **kwargs)
+        await super().start(*args, **kargs)
         self._invoke_retries = invoke_retries
         self._pool_semaphore = asyncio.Semaphore(max_pool)
         self._session_invoke = self.session.invoke
         self.session.invoke = self._custom_invoke
-        self._connect = self.connection_factory.connect
-        self.connection_factory.connect = self._custom_connect
-
-    async def _custom_connect(self, query):
-        async with self._pool_semaphore:
-            try:
-                return await self._connect(query)
-            except Exception:
-                logger.exception("连接时发生异常")
-                if state_manager.get_item("BASIC", "auto_restart", "off") == "on":
-                    sys.exit(1)
-                raise
 
     async def _custom_invoke(self, query, *args, **kwargs):
         retries = 0
@@ -59,28 +47,27 @@ class Client(_Client):
                     await asyncio.sleep(wait_time)
                     retries += 1
 
-                except asyncio.TimeoutError:
+                except asyncio.TimeoutError as e:
                     logger.error(f"TimeoutError for {query.__class__.__name__}")
-                    logger.exception("超时异常")
+                    traceback.print_exc()
                     await asyncio.sleep(1)
                     retries += 1
 
                 except RPCError as e:
                     logger.error(f"RPCError for {query.__class__.__name__}")
-                    logger.exception("RPC异常")
+                    traceback.print_exc()
                     if isinstance(e, (Unauthorized, AuthKeyInvalid)):
                         raise
                     await asyncio.sleep(1)
                     retries += 1
 
-                except Exception:
+                except Exception as e:
                     logger.error(f"意外错误 for {query.__class__.__name__}")
-                    logger.exception("未知异常")
-                    retries += 1  # 防止死循环
+                    traceback.print_exc()
+                    retries += 1
 
         logger.critical(
             f"超过最大重试次数 ({self._invoke_retries}) for {query.__class__.__name__}。触发 Supervisor 重启。"
         )
         if state_manager.get_item("BASIC", "auto_restart", "off") == "on":
             sys.exit(1)
-        raise RuntimeError(f"Invoke failed for {query.__class__.__name__}")
