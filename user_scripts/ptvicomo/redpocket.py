@@ -21,7 +21,7 @@ BONUS_NAME = "象草"
 
 @Client.on_message(
     filters.chat(TARGET)
-    & custom_filters.zhuque_bot
+    & custom_filters.create_bot_filter(7124396542)
     & filters.regex(
         r"饲养员: ([\s\S]*?)\n内容: ([\s\S]*?)\n象草: (\d+(?:\.\d+)?)/\d+(?:\.\d+)?\n数量: .*?"
     )
