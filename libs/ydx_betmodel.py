@@ -86,6 +86,8 @@ class B(BetModel):
         self.guess_dx = data[-1]
         return self.guess_dx
     def get_bet_count(self, data: list[int], start_count=0, stop_count=0):
+        if 0 < self.fail_count < stop_count:
+            return self.fail_count
         count=super().get_bet_count(data, start_count, stop_count)
         if count >= 0:
             return min(self.fail_count,count)
@@ -99,6 +101,8 @@ class E(BetModel):
             self.guess_dx = random.randint(0, 1)
         return self.guess_dx
     def get_bet_count(self, data: list[int], start_count=0, stop_count=0):
+        if 0 < self.fail_count < stop_count:
+            return self.fail_count
         count=super().get_bet_count(data, start_count, stop_count)
         if count >= 0:
             return min(self.fail_count,count)
