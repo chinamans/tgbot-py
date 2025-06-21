@@ -57,7 +57,7 @@ async def zhuque_ydx_manual_bet(bet_amount: int, flag: str, message: Message):
     bet_values = [50_000_000, 5_000_000, 1_000_000, 250_000, 50_000, 20_000, 2_000, 500]
     bet_counts = []
     # 限制最大下注额度
-    remaining_bouns = min(bet_amount, 10_000_000)
+    remaining_bouns = min(bet_amount, 50_000_000)
     logger.info(f"可下注总额 remaining_bouns = {remaining_bouns}")
     # 计算各按钮点击次数
     for value in bet_values:
