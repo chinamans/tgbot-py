@@ -47,6 +47,7 @@ class BetModel(ABC):
         }
 
     def set_result(self, result: int):
+        """更新连败次数,在监听结果中调用了"""
         if self.guess_dx != -1:
             if result == self.guess_dx:
                 self.fail_count = 0
@@ -54,6 +55,9 @@ class BetModel(ABC):
                 self.fail_count += 1
 
     def get_consecutive_count(self, data: list[int]):
+        """
+        根据秋人结果计算连大连小次数
+        """
         if not data:
             return 0
         last = data[-1]
@@ -68,6 +72,7 @@ class BetModel(ABC):
         return count
 
     def get_bet_count(self, data: list[int], start_count=0, stop_count=0):
+        """根据配置计算当前下注多少次"""
         consecutive_count = self.get_consecutive_count(data)
         bet_count = consecutive_count - start_count
         if 0 <= bet_count < stop_count:
