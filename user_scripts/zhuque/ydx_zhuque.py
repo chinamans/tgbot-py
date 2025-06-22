@@ -297,6 +297,8 @@ async def zhuque_ydx_models(
     bet_model = bet_models[model.lower()]
     data = await history_list(message)
     dx = bet_model.guess(data)
+    for md in bet_models.values():
+        md.guess(data)
     logger.info(f"猜测结果 dx={dx}, 数据={data}, 模型={model}")
     # 0,1 转为 s,b
     bet_side = opposite_map[dx]
@@ -306,5 +308,5 @@ async def zhuque_ydx_models(
     if bet_count > -1:
         # 等比下注公式：Sn = a(n² + n) + a
         # 1000 * (2 ** (n + 1) - 1)
-        bet_bonus = start_bonus * (2 ** (bet_count + 1) - 1)
+        bet_bonus = bet_model.get_bet_bonus(start_bonus, bet_count)
         await zhuque_ydx_manual_bet(bet_bonus, bet_side, message)
