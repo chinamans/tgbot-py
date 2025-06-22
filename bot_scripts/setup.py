@@ -51,7 +51,7 @@ BOT_COMMANDS: list[tuple[BotCommand, list[CommandScope]]] = [
         [CommandScope.PRIVATE_CHATS],
     ),
     (
-        BotCommand("card", "朱雀道具卡片回收"),
+        BotCommand("card", "朱雀道具卡回收"),
         [CommandScope.PRIVATE_CHATS],
     ),
     (
