@@ -79,7 +79,9 @@ class BetModel(ABC):
             return bet_count
         return -1
 
-
+    def get_bet_bonus(self, start_bonus, bet_count):
+        return start_bonus * (2 ** (bet_count + 1) - 1)
+        
 class A(BetModel):
     def guess(self, data):
         self.guess_dx = 1 - data[-1]
