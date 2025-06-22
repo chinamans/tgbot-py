@@ -17,6 +17,9 @@ from pyrogram.handlers import MessageHandler
 from app import get_bot_app
 from config.config import MY_TGID
 from libs.state import state_manager
+from libs.zhuque_listBackpack import listBackpack
+from libs.zhuque_recycleMagicCard import main as recycleMagicCard
+
 
 
 class Method(Enum):
@@ -48,12 +51,15 @@ class InlineButton:
         self.state_section = state_manager.get_section(section, {})
 
     def set_main_keyboard(self, keyboard):
-        self.main_keyboard = keyboard
+        self.main_keyboard = keyboard  # 注意：现在 keyboard 是 async 函数
 
-    def create_button(self, method: Method, default_state=None):
-        if method.func_type not in ["toggle", "select", "input"]:
+    async def create_button(self, method: Method, default_state=None):
+        if method.func_type not in ["toggle", "select", "input", "input_card"]:
             raise ValueError(f"Unsupported function type: {method.func_type}")
-        return getattr(self, f"{method.func_type}_button")(method, default_state)
+        func = getattr(self, f"{method.func_type}_button")
+        if asyncio.iscoroutinefunction(func):
+            return await func(method, default_state)
+        return func(method, default_state)
 
     def _create_button(self, method: Method, string_state=None):
         return InlineKeyboardButton(
@@ -72,14 +78,21 @@ class InlineButton:
     def select_button(self, method: Method, default_state=None):
         default_state = default_state or method.options[0]
         current_state = state_manager.get_item(self.section, method.name, default_state)
-        string_state = current_state
-        return self._create_button(method, string_state)
+        return self._create_button(method, current_state)
 
     def input_button(self, method: Method, default_state=None):
         default_state = default_state or "未设置"
         current_state = state_manager.get_item(self.section, method.name, default_state)
+        return self._create_button(method, current_state if current_state else default_state)
+
+    async def input_card_button(self, method: Method, default_state=None):
+        default_state = default_state or "未设置"
+        result = await listBackpack()
+        current_state = result[int(method.name[-1])]
+        print(current_state)
         string_state = current_state if current_state else default_state
         return self._create_button(method, string_state)
+
 
     def back_button(self):
         return InlineKeyboardButton(
@@ -128,6 +141,7 @@ class InlineButton:
         return self.g.get(key, None)
 
     async def input(self, client: Client, message: Message):
+        bot_app = get_bot_app()
         if not message.text or not message.text.strip():
             return
         method: Method = self.get_global("method")
@@ -152,11 +166,19 @@ class InlineButton:
                     raise ValueError(f"请输入{length_str}个字符以内的字符串")
             except Exception as e:
                 return await message.reply(str(e))
-        state_manager.set_section(self.section, {method.name: value})
+        
+        if method.name[:7] == "card_id":
+            
+            result_msg = await recycleMagicCard(int(method.name[-1]), int(value))
+            await bot_app.send_message(message.chat.id, result_msg)
+            
+        else:
+            state_manager.set_section(self.section, {method.name: value})
+
         await cb.edit_message_text(
             self.main_message(),
-            reply_markup=self.main_keyboard(),
-        )
+            reply_markup=await self.main_keyboard(),
+            )
         self.remove_handler()
 
     def input_message(self, method: Method, timeout=30):
@@ -205,12 +227,12 @@ async def inline_button_callback(
         case "toggle":
             state_manager.toggle_item(inline_button.section, method.name)
             await callback_query.edit_message_reply_markup(
-                reply_markup=inline_button.main_keyboard()
+                reply_markup = await inline_button.main_keyboard()
             )
         case "select":
             await callback_query.edit_message_text(
                 inline_button.select_message(method),
-                reply_markup=inline_button.select_keyboard(method),
+                reply_markup = inline_button.select_keyboard(method),
             )
         case "input":
             inline_button.set_global("method", method)
@@ -218,13 +240,25 @@ async def inline_button_callback(
             timeout = 30
             await callback_query.edit_message_text(
                 inline_button.input_message(method, timeout),
-                reply_markup=inline_button.input_keyboard(),
+                reply_markup = inline_button.input_keyboard(),
             )
             asyncio.create_task(inline_button.add_handler(timeout))
+        case "input_card":
+            inline_button.set_global("method", method)
+            inline_button.set_global("cb", callback_query)
+            timeout = 30
+            await callback_query.edit_message_text(
+                inline_button.input_message(method, timeout),
+                reply_markup = inline_button.input_keyboard(),
+            )
+            asyncio.create_task(inline_button.add_handler(timeout))
+      
+
         case "back":
+ 
             await callback_query.edit_message_text(
                 inline_button.main_message(),
-                reply_markup=inline_button.main_keyboard(),
+                reply_markup = await inline_button.main_keyboard(),
             )
         case "close":
             await callback_query.message.delete()
@@ -234,5 +268,5 @@ async def inline_button_callback(
                 state_manager.set_section(inline_button.section, {method.name: value})
             await callback_query.edit_message_text(
                 inline_button.main_message(),
-                reply_markup=inline_button.main_keyboard(),
+                reply_markup = await inline_button.main_keyboard(),
             )

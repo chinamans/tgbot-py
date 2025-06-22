@@ -9,7 +9,6 @@ from pyrogram.types import (
     InlineKeyboardMarkup,
 )
 
-
 # 自定义模块
 from config.config import MY_TGID
 from filters.custom_filters import CallbackDataFromFilter
@@ -51,20 +50,20 @@ class Ydx(Method):
 inline_button = InlineButton(SITE_NAME, ACTION, MESSAGE)
 
 
-def main_keyboard():
+async def main_keyboard():
     return InlineKeyboardMarkup(
         [
             [
-                inline_button.create_button(Ydx.ydx_dice_reveal),
-                inline_button.create_button(Ydx.ydx_dice_bet),
+                await inline_button.create_button(Ydx.ydx_dice_reveal),
+                await inline_button.create_button(Ydx.ydx_dice_bet),
             ],
             [
-                inline_button.create_button(Ydx.ydx_start_count),
-                inline_button.create_button(Ydx.ydx_stop_count),
+                await inline_button.create_button(Ydx.ydx_start_count),
+                await inline_button.create_button(Ydx.ydx_stop_count),
             ],
             [
-                inline_button.create_button(Ydx.ydx_start_bouns),
-                inline_button.create_button(Ydx.ydx_bet_model),
+                await inline_button.create_button(Ydx.ydx_start_bouns),
+                await inline_button.create_button(Ydx.ydx_bet_model),
             ],
             [inline_button.close_button()],
         ]
@@ -76,7 +75,7 @@ inline_button.set_main_keyboard(main_keyboard)
 
 @Client.on_message(filters.chat(MY_TGID) & filters.command(ACTION))
 async def ydx_set(_, message: Message):
-    await message.reply(inline_button.main_message(), reply_markup=main_keyboard())
+    await message.reply(inline_button.main_message(), reply_markup = await main_keyboard())
 
 
 @Client.on_callback_query(CallbackDataFromFilter(ACTION))

@@ -1,12 +1,21 @@
+# 系统库
+from enum import auto
+
 # 第三方库
 from pyrogram import filters, Client
 from pyrogram.types import Message
+from pyrogram.types import (
+    Message,
+    CallbackQuery,
+    InlineKeyboardMarkup,
+)
 
 # 自定义模块
 from config.config import MY_TGID
 from libs import others
 from libs.state import state_manager
-
+from libs.inline_buttons import Method, InlineButton, inline_button_callback
+from filters.custom_filters import CallbackDataFromFilter
 
 header = "ZHUQUE"
 
@@ -94,14 +103,7 @@ async def blockyword_add_remove(client: Client, message: Message):
         await message.reply("无效参数。请使用 `add` 或 `remove`")
 
 
-from enum import auto
-from pyrogram.types import (
-    Message,
-    CallbackQuery,
-    InlineKeyboardMarkup,
-)
-from libs.inline_buttons import Method, InlineButton, inline_button_callback
-from filters.custom_filters import CallbackDataFromFilter
+
 
 
 SITE_NAME = "ZHUQUE"
