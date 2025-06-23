@@ -7,7 +7,6 @@ from app import logger
 class BetModel(ABC):
     fail_count: int = 0
     guess_dx: int = -1
-    last_win: bool = False  # 添加属性记录上次是否中奖
 
     @abstractmethod
     def guess(self, data):
@@ -28,10 +27,8 @@ class BetModel(ABC):
                     loss_count[turn_loss_count] += 1
                     win_count += 1
                     turn_loss_count = 0
-                    self.last_win = True  # 标记本次中奖
                 else:
                     turn_loss_count += 1
-                    self.last_win = False  # 标记本次未中奖
         max_nonzero_index = next(
             (
                 index
@@ -50,6 +47,7 @@ class BetModel(ABC):
         }
 
     def set_result(self, result: int):
+        """更新连败次数,在监听结果中调用了"""
         if self.guess_dx != -1:
             if result == self.guess_dx:
                 self.fail_count = 0
@@ -57,7 +55,9 @@ class BetModel(ABC):
                 self.fail_count += 1
 
     def get_consecutive_count(self, data: list[int]):
-        """计算当前连续相同结果的次数"""
+        """
+        根据秋人结果计算连大连小次数
+        """
         if not data:
             return 0
         last = data[-1]
@@ -72,7 +72,7 @@ class BetModel(ABC):
         return count
 
     def get_bet_count(self, data: list[int], start_count=0, stop_count=0):
-        """计算下注期数（与策略A一致）"""
+        """根据配置计算当前下注多少次"""
         consecutive_count = self.get_consecutive_count(data)
         bet_count = consecutive_count - start_count
         if 0 <= bet_count < stop_count:
@@ -80,25 +80,23 @@ class BetModel(ABC):
         return -1
 
     def get_bet_bonus(self, start_bonus, bet_count):
-        """基础倍投策略"""
-        return start_bonus * (2 ** (bet_count + 1) - 1
+        return start_bonus * (2 ** (bet_count + 1) - 1)
         
 class A(BetModel):
     def guess(self, data):
-        self.guess_dx = 1 - data[-1]  # 反龙策略
+        self.guess_dx = 1 - data[-1]
         return self.guess_dx
 
 
 class B(BetModel):
     def guess(self, data):
-        self.guess_dx = data[-1]  # 跟龙策略
+        self.guess_dx = data[-1]
         return self.guess_dx
-    
-    def get_bet_bonus(self, start_bonus, bet_count):
-        if self.last_win:
-            return start_bonus
-        else:
-            return super().get_bet_bonus(start_bonus, bet_count)
+    def get_bet_count(self, data: list[int], start_count=0, stop_count=0):
+        if 0 < self.fail_count < stop_count:
+            return self.fail_count
+        count=super().get_bet_count(data, start_count, stop_count)
+        return -1
 
 class E(BetModel):
     def guess(self, data):
@@ -107,7 +105,6 @@ class E(BetModel):
         if self.fail_count % 2 == 0:
             self.guess_dx = random.randint(0, 1)
         return self.guess_dx
-    
     def get_bet_count(self, data: list[int], start_count=0, stop_count=0):
         if 0 < self.fail_count < stop_count:
             return self.fail_count
