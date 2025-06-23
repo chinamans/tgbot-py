@@ -87,10 +87,17 @@ class A(BetModel):
         self.guess_dx = 1 - data[-1]
         return self.guess_dx
 
+
 class B(BetModel):
     def guess(self, data):
         self.guess_dx = data[-1]
         return self.guess_dx
+    
+    def get_bet_count(self, data: list[int], start_count=0, stop_count=0):
+        if 0 < self.fail_count < stop_count:
+            return self.fail_count
+        return -1
+
 
 class E(BetModel):
     def guess(self, data):
@@ -99,12 +106,14 @@ class E(BetModel):
         if self.fail_count % 2 == 0:
             self.guess_dx = random.randint(0, 1)
         return self.guess_dx
+    
     def get_bet_count(self, data: list[int], start_count=0, stop_count=0):
+        # 保持原有逻辑（可选是否优化）
         if 0 < self.fail_count < stop_count:
             return self.fail_count
-        count=super().get_bet_count(data, start_count, stop_count)
+        count = super().get_bet_count(data, start_count, stop_count)
         if count >= 0:
-            return min(self.fail_count,count)
+            return min(self.fail_count, count)
         return -1
 
 
