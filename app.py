@@ -2,6 +2,7 @@
 import os
 import json
 from pathlib import Path
+from scheduler_manager import start_scheduler
 
 # 第三方库
 from pyrogram import idle
@@ -15,7 +16,6 @@ from models import create_all, async_engine
 from models.alter_tables import alter_columns
 from schedulers import scheduler, start_scheduler
 
-
 user_app: Client = None
 bot_app: Client = None
 
@@ -24,6 +24,8 @@ if proxy_set["proxy_enable"] == True:
 else:
     proxy = None
 
+async def main():
+    start_scheduler()  # 启动定时任务调度器
 
 async def start_app():
     db_flag_path = Path("db_file/dbflag/dbflag.json")
