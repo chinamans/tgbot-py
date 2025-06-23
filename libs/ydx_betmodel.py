@@ -87,15 +87,10 @@ class A(BetModel):
         self.guess_dx = 1 - data[-1]
         return self.guess_dx
 
-
 class B(BetModel):
     def guess(self, data):
         self.guess_dx = data[-1]
         return self.guess_dx
-    def get_bet_count(self, data: list[int], start_count=0, stop_count=0):
-        if 0 < self.fail_count < stop_count:
-            return self.fail_count
-        return -1
 
 class E(BetModel):
     def guess(self, data):
