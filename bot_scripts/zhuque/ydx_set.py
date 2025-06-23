@@ -27,7 +27,7 @@ class Ydx(Method):
         auto(),
         "几连开始下注",
         "select",
-        [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+        [0,1, 2, 3, 4, 5, 6, 7, 8, 9],
     )
     ydx_stop_count = (
         auto(),
