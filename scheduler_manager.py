@@ -1,16 +1,49 @@
 # scheduler_manager.py
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
-from libs.state import state_manager
 from libs.log import logger
 
+# 全局调度器实例
 scheduler = AsyncIOScheduler()
+
+def start_scheduler():
+    """启动定时任务调度器"""
+    if not scheduler.running:
+        scheduler.start()
+        logger.info("定时任务调度器已启动")
+
+def schedule_model_switch(interval_minutes: int):
+    """安排模型切换任务"""
+    # 延迟导入避免循环依赖
+    from libs.state import state_manager
+    
+    # 移除现有任务
+    if scheduler.get_job('model_switch_job'):
+        scheduler.remove_job('model_switch_job')
+    
+    # 添加新任务
+    scheduler.add_job(
+        switch_model_job,
+        'interval',
+        minutes=interval_minutes,
+        id='model_switch_job'
+    )
+    logger.info(f"已安排模型切换任务，间隔: {interval_minutes}分钟")
+
+def stop_model_switch():
+    """停止模型切换"""
+    if scheduler.get_job('model_switch_job'):
+        scheduler.remove_job('model_switch_job')
+    logger.info("已停止模型切换任务")
 
 async def switch_model_job():
     """自动切换下注模型任务"""
     try:
+        # 延迟导入避免循环依赖
+        from libs.state import state_manager
+        
         # 获取当前状态
-        current_index = int(state_manager.get_item("ZHUQUE", "current_model_index", 0))
-        models = ["a", "b"]  # 可切换的模型列表
+        current_index = int(state_manager.get_item("ZHUQUE", "current_model_index", "0"))
+        models = ["a", "b"]
         
         # 计算下一个模型索引
         new_index = (current_index + 1) % len(models)
@@ -24,28 +57,3 @@ async def switch_model_job():
         logger.info(f"自动切换下注模型: {models[current_index]} → {models[new_index]}")
     except Exception as e:
         logger.error(f"切换模型失败: {e}")
-
-def start_scheduler():
-    """启动定时任务"""
-    if not scheduler.running:
-        scheduler.start()
-        logger.info("定时任务调度器已启动")
-
-def schedule_model_switch(interval_minutes: int):
-    """安排模型切换任务"""
-    # 移除现有任务
-    scheduler.remove_job('model_switch_job')
-    
-    # 添加新任务
-    scheduler.add_job(
-        switch_model_job,
-        'interval',
-        minutes=interval_minutes,
-        id='model_switch_job'
-    )
-    logger.info(f"已安排模型切换任务，间隔: {interval_minutes}分钟")
-
-def stop_model_switch():
-    """停止模型切换"""
-    scheduler.remove_job('model_switch_job')
-    logger.info("已停止模型切换任务")
