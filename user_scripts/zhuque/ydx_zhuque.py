@@ -4,6 +4,7 @@ import asyncio
 from decimal import Decimal
 from random import random
 from typing import Optional, Tuple
+from scheduler_manager import start_scheduler
 
 # 第三方库
 from pyrogram import Client, filters
@@ -41,6 +42,18 @@ SENDID = {
     "SHUJI": 5721909476,  # 川普书记
 }
 
+########################模型切换#######################################################
+
+start_scheduler()
+
+# 修改模型选择逻辑
+async def zhuque_ydx_models(...):
+    # 获取当前模型 - 优先使用自动切换模型
+    if state_manager.get_item(SITE_NAME.upper(), "auto_switch_model", "off") == "on":
+        model_index = int(state_manager.get_item(SITE_NAME.upper(), "current_model_index", 0))
+        bet_model = ["a", "b"][model_index]
+    else:
+        bet_model = state_manager.get_item(SITE_NAME.upper(), "ydx_bet_model", "a")
 
 ########################指定金额下注函数##############################################
 async def zhuque_ydx_manual_bet(bet_amount: int, flag: str, message: Message):
