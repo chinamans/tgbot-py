@@ -91,16 +91,6 @@ class B(BetModel):
     def guess(self, data):
         self.guess_dx = data[-1]
         return self.guess_dx
-    def get_bet_count(self, data: list[int], start_count=0, stop_count=0):
-        if stop_count > 0 and self.fail_count >= stop_count:
-            return -1
-        if 0 < self.fail_count < stop_count:
-            return self.fail_count
-        consecutive_count = self.get_consecutive_count(data)
-        trend_count = consecutive_count - start_count
-        if trend_count >= 0:
-            return trend_count
-        return -1
 
 class E(BetModel):
     def guess(self, data):
