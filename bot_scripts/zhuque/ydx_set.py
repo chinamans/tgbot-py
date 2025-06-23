@@ -1,5 +1,6 @@
 # 系统库
 from enum import auto
+from scheduler_manager import schedule_model_switch, stop_model_switch
 
 # 第三方库
 from pyrogram import filters, Client
