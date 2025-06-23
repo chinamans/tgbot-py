@@ -95,8 +95,6 @@ class B(BetModel):
     def get_bet_count(self, data: list[int], start_count=0, stop_count=0):
         if 0 < self.fail_count < stop_count:
             return self.fail_count
-        count=super().get_bet_count(data, start_count, stop_count)
-        return -1
 
 class E(BetModel):
     def guess(self, data):
