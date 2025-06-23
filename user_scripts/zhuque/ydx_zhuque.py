@@ -44,16 +44,27 @@ SENDID = {
 
 ########################模型切换#######################################################
 
-start_scheduler()
+try:
+    start_scheduler()
+    logger.info("ydx_zhuque模块初始化调度器")
+except Exception as e:
+    logger.error(f"初始化调度器失败: {e}")
+    logger.error(traceback.format_exc())
 
 # 修改模型选择逻辑
-async def zhuque_ydx_models(...):
+async def zhuque_ydx_models(
+    start_count, stop_count, start_bonus, message: Message, model="a"
+):
+    from libs.state import state_manager
+    
     # 获取当前模型 - 优先使用自动切换模型
     if state_manager.get_item(SITE_NAME.upper(), "auto_switch_model", "off") == "on":
-        model_index = int(state_manager.get_item(SITE_NAME.upper(), "current_model_index", 0))
+        model_index = int(state_manager.get_item(SITE_NAME.upper(), "current_model_index", "0"))
         bet_model = ["a", "b"][model_index]
+        logger.info(f"使用自动切换模型: {bet_model} (索引:{model_index})")
     else:
         bet_model = state_manager.get_item(SITE_NAME.upper(), "ydx_bet_model", "a")
+        logger.info(f"使用手动选择模型: {bet_model}")
 
 ########################指定金额下注函数##############################################
 async def zhuque_ydx_manual_bet(bet_amount: int, flag: str, message: Message):
