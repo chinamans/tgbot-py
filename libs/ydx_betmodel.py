@@ -46,7 +46,7 @@ class BetModel(ABC):
             "guess": dx,
         }
 
-    def set_result(self, result: int):
+    def set_result(self, result: int):					
         if self.guess_dx != -1:
             if result == self.guess_dx:
                 self.fail_count = 0
@@ -82,12 +82,10 @@ class A(BetModel):
         self.guess_dx = 1 - data[-1]  # 反龙策略
         return self.guess_dx
 
-
 class B(BetModel):
     def guess(self, data):
         self.guess_dx = data[-1]  # 跟龙策略
         return self.guess_dx
-    # 移除了自定义的get_bet_count方法
 
 class E(BetModel):
     def guess(self, data):
