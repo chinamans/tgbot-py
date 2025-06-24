@@ -10,5 +10,5 @@ async def bash(command):
     )
     stdout, stderr = await proc.communicate()
     if proc.returncode != 0:
-        raise RuntimeError(f"bash failed: {stderr.decode().strip()}")
+        raise RuntimeError(f"bash {command} failed: {stderr.decode().strip()}")
     return stdout.decode().strip()
