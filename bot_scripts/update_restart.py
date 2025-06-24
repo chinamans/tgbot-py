@@ -1,14 +1,24 @@
 # 标准库
+import json
 import subprocess
+from enum import auto
 
 # 第三方库
 from pyrogram import filters, Client
-from pyrogram.types import Message
+from pyrogram.types import (
+    Message,
+    CallbackQuery,
+    InlineKeyboardMarkup,
+    InlineKeyboardButton,
+)
+
 
 # 自定义模块
 from config.config import MY_TGID
+from libs.inline_buttons import InlineButton, Method
 from libs.log import logger
-
+from libs.async_bash import bash
+from filters.custom_filters import CallbackDataFromFilter
 
 
 # 监听来自指定TG用户的 /update 命令
@@ -44,11 +54,48 @@ async def update_tg_bot(client: Client, message: Message):
 @Client.on_message(filters.chat(MY_TGID) & filters.command("restart"))
 async def restart_tg_bot(client: Client, message: Message):
     # 回复用户，提示正在检测更新
-    reply_message = await message.reply("开始重启")       
-     
+    reply_message = await message.reply("开始重启")
+
     try:
         # 重启 supervisor 管理的 main 服务
         subprocess.run(["supervisorctl", "restart", "main"])
     except Exception as e:
         await message.reply(f"重启服务时出错: {e}")
-        logger.error(f"重启服务时出错: {e}")   
+        logger.error(f"重启服务时出错: {e}")
+
+
+class Update(Method):
+    update = (auto(), "结果记录开关", "sc")
+
+
+tags = None
+
+
+@Client.on_message(filters.chat(MY_TGID) & filters.command("update_new"))
+async def update_tg_bot(client: Client, message: Message):
+    global tags
+    (await bash("git ftech origin"))
+    tags = (await bash("git tag")).split("\n")
+    tags.sort(reverse=True)
+    one_line_count = 2
+    keyboard = [
+        [
+            InlineKeyboardButton(tags[i + j], json.dumps({"c": i + j, "a": "update"}))
+            for j in range(one_line_count)
+            if i + j < len(tags)
+        ]
+        for i in range(0, len(tags), one_line_count)
+    ]
+    await message.reply("请选择版本", reply_markup=InlineKeyboardMarkup(keyboard))
+
+
+@Client.on_callback_query(CallbackDataFromFilter("update"))
+async def ydx_set_callback(client: Client, callback_query: CallbackQuery):
+    global tags
+    data: dict = json.loads(callback_query.data)
+    count = data.get("c", None)
+    print(count)
+    await callback_query.answer(f"切换到{tags[count]}")
+    await bash(f"git checkout {tags[count]}")
+    await bash("pip install -r requirements.txt")
+    await bash("supervisorctl restart main")
