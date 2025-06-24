@@ -71,7 +71,7 @@ tags = None
 async def update_tg_bot(client: Client, message: Message):
     global tags
     await bash("git fetch --prune --prune-tags origin")
-    tags = ["main"] + (await bash("git tag --sort=-creatordate")).split("\n")
+    tags = ["origin/main"] + (await bash("git tag --sort=-creatordate")).split("\n")
     one_line_count = 2
     keyboard = [
         [
