@@ -74,7 +74,7 @@ tags = None
 @Client.on_message(filters.chat(MY_TGID) & filters.command("update_new"))
 async def update_tg_bot(client: Client, message: Message):
     global tags
-    (await bash("git ftech origin"))
+    await bash("git fetch origin")
     tags = (await bash("git tag")).split("\n")
     tags.sort(reverse=True)
     one_line_count = 2
