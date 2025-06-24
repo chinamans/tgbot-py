@@ -91,8 +91,8 @@ async def ydx_set_callback(client: Client, callback_query: CallbackQuery):
     count = data.get("c", None)
     ret = "开始更新..."
     await callback_query.message.edit(ret)
-    out = await bash(f"git checkout {tags[count]}")
-    if "Previous HEAD" in out:
+    stdout = await bash(f"git checkout {tags[count]}")
+    if stdout.startswith("Previous HEAD"):
         ret += f"\n✅ 更新到新版本：{tags[count]}"
         await callback_query.message.edit(ret)
         await bash("pip install -r requirements.txt")
@@ -100,5 +100,5 @@ async def ydx_set_callback(client: Client, callback_query: CallbackQuery):
         await callback_query.message.edit(ret)
         await bash("supervisorctl restart main")
     else:
-        ret += f"\n✅ 版本未更新"
+        ret += f"\n✅ 您的版本未变化"
         await callback_query.message.edit(ret)
