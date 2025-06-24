@@ -70,8 +70,9 @@ tags = None
 @Client.on_message(filters.chat(MY_TGID) & filters.command("update"))
 async def update_tg_bot(client: Client, message: Message):
     global tags
-    await bash("git fetch origin")
+    await bash("git fetch --prune origin")
     tags = (await bash("git tag")).split("\n")
+    tags.append("main")
     tags.sort(reverse=True)
     one_line_count = 2
     keyboard = [
@@ -96,6 +97,6 @@ async def ydx_set_callback(client: Client, callback_query: CallbackQuery):
     ret += f"\n✅ 更新到新版本：{tags[count]}"
     await callback_query.message.edit(ret)
     await bash("pip install -r requirements.txt")
-    ret += f"\n✅ pip 更新完成\n开始重启..."
+    ret += f"\n✅ 依赖安装成功\n⏱️ 等待重启..."
     await callback_query.message.edit(ret)
     await bash("supervisorctl restart main")
