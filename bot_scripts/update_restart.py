@@ -70,10 +70,8 @@ tags = None
 @Client.on_message(filters.chat(MY_TGID) & filters.command("update"))
 async def update_tg_bot(client: Client, message: Message):
     global tags
-    await bash("git fetch --prune origin")
-    tags = (await bash("git tag")).split("\n")
-    tags.append("main")
-    tags.sort(reverse=True)
+    await bash("git fetch --prune --prune-tags origin")
+    tags = ["main"] + (await bash("git tag --sort=-creatordate")).split("\n")
     one_line_count = 2
     keyboard = [
         [
