@@ -65,9 +65,16 @@ class Client(_Client):
                     logger.error(f"意外错误 for {query.__class__.__name__}")
                     traceback.print_exc()
                     retries += 1
-
-        logger.critical(
-            f"超过最大重试次数 ({self._invoke_retries}) for {query.__class__.__name__}。触发 Supervisor 重启。"
+        # 超过最大重试次数后，尝试 get_me 判断是否需要重启
+        try:
+            await self.get_me()
+        except Exception:
+            logger.critical(
+                f"超过最大重试次数 ({self._invoke_retries}) for {query.__class__.__name__}。触发 Supervisor 重启。"
+            )
+            if state_manager.get_item("BASIC", "auto_restart", "off") == "on":
+                sys.exit(1)
+        # get_me 成功，说明连接正常，抛出重试失败异常
+        raise RuntimeError(
+            f"超过最大重试次数 ({self._invoke_retries}) for {query.__class__.__name__}"
         )
-        if state_manager.get_item("BASIC", "auto_restart", "off") == "on":
-            sys.exit(1)

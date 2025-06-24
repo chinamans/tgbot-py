@@ -25,3 +25,9 @@ async def configstate(client: Client, message: Message):
 async def sysstate(client: Client, message: Message):
     project_name, tgbot_sate = await system_version_get()
     await message.reply(tgbot_sate)
+
+
+# 监听来自指定TG用户的 /err 命令 抛出错误
+@Client.on_message(filters.chat(MY_TGID) & filters.command("err"))
+async def err(client: Client, message: Message):
+    await client.send_message(-1111, 1)
