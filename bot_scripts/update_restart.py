@@ -104,7 +104,7 @@ async def ydx_set_callback(client: Client, callback_query: CallbackQuery):
     ret = "开始更新..."
     await callback_query.message.edit(ret)
     stdout = await bash(f"git checkout {tags[count]}")
-    if stdout.startswith("Previous HEAD"):
+    if "Previous HEAD" in stdout:
         ret += f"\n✅ 更新到新版本：{tags[count]}"
         await callback_query.message.edit(ret)
         await bash("pip install -r requirements.txt")
