@@ -70,6 +70,7 @@ tags = None
 @Client.on_message(filters.chat(MY_TGID) & filters.command("update"))
 async def update_tg_bot(client: Client, message: Message):
     global tags
+    await bash("git reset --hard")
     await bash("git fetch --prune --prune-tags origin")
     tags = ["origin/main"] + (await bash("git tag --sort=-creatordate")).split("\n")
     tags = tags[:6]
