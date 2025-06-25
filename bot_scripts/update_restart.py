@@ -105,7 +105,9 @@ async def ydx_set_callback(client: Client, callback_query: CallbackQuery):
     await callback_query.message.edit(ret)
     stdout = await bash(f"git checkout {tags[count]}")
     commit_hash = await bash(f"git rev-parse HEAD")
-    commit_log = await bash(f'git log -1 --pretty=format:"%h - %s" {commit_hash}')
+    commit_log = await bash(
+        "git", "log", "-1", '--pretty=format:"%h - %s"', commit_hash
+    )
     if "Previous HEAD" in stdout:
         ret += f"\n✅ 更新到新版本：{tags[count]} - {commit_log}"
         await callback_query.message.edit(ret)
