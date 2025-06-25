@@ -76,12 +76,22 @@ async def update_tg_bot(client: Client, message: Message):
     one_line_count = 2
     keyboard = [
         [
-            InlineKeyboardButton(tags[i + j], json.dumps({"c": i + j, "a": "update"}))
+            InlineKeyboardButton(
+                tags[i + j], json.dumps({"f": "s", "c": i + j, "a": "update"})
+            )
             for j in range(one_line_count)
             if i + j < len(tags)
         ]
         for i in range(0, len(tags), one_line_count)
     ]
+    keyboard.append(
+        [
+            InlineKeyboardButton(
+                "关闭",
+                callback_data=json.dumps({"f": "close", "a": "update"}),
+            )
+        ]
+    )
     await message.reply("请选择版本", reply_markup=InlineKeyboardMarkup(keyboard))
 
 

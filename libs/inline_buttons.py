@@ -279,7 +279,6 @@ async def inline_button_callback(
             asyncio.create_task(inline_button.add_handler(timeout))
 
         case "back":
-
             await callback_query.edit_message_text(
                 inline_button.main_message(),
                 reply_markup=await inline_button.main_keyboard(),
