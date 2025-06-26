@@ -81,7 +81,8 @@ class BetModel(ABC):
 
     def get_bet_bonus(self, start_bonus, bet_count):
         return start_bonus * (2 ** (bet_count + 1) - 1)
-        
+
+
 class A(BetModel):
     def guess(self, data):
         self.guess_dx = 1 - data[-1]
@@ -92,11 +93,13 @@ class B(BetModel):
     def guess(self, data):
         self.guess_dx = data[-1]
         return self.guess_dx
+
     def get_bet_count(self, data: list[int], start_count=0, stop_count=0):
-        bet_count = self.fail_count - start_count 
-        if 0 <= self.fail_count < stop_count:
-            return self.fail_count
+        bet_count = self.fail_count - start_count
+        if 0 <= bet_count < stop_count:
+            return bet_count
         return -1
+
 
 class E(BetModel):
     def guess(self, data):
@@ -105,12 +108,11 @@ class E(BetModel):
         if self.fail_count % 2 == 0:
             self.guess_dx = random.randint(0, 1)
         return self.guess_dx
+
     def get_bet_count(self, data: list[int], start_count=0, stop_count=0):
-        if 0 < self.fail_count < stop_count:
-            return self.fail_count
-        count=super().get_bet_count(data, start_count, stop_count)
-        if count >= 0:
-            return min(self.fail_count,count)
+        bet_count = self.fail_count - start_count
+        if 0 <= bet_count < stop_count:
+            return bet_count
         return -1
 
 
