@@ -66,7 +66,7 @@ async def zhuque_autofire_firsttimeget():
         if date.today() - last_time.date() > timedelta(days=1):
             next_time = datetime.now() + timedelta(seconds=10)
         else:
-            next_time = last_time + timedelta(days=1)
+            next_time = last_time + timedelta(days=1) + timedelta(seconds=10)
     else:
         next_time = datetime.now() + timedelta(seconds=30)
     scheduler.add_job(
@@ -84,7 +84,7 @@ async def zhuque_autofire():
     now = datetime.now()
     try:
         result1 = await fireGenshinCharacterMagic()
-        await asyncio.sleep(2)
+        await asyncio.sleep(15)
         result2 = await fireGenshinCharacterMagic()
 
         code1, bonus1 = result1 if result1 else ("", 0)
@@ -94,7 +94,7 @@ async def zhuque_autofire():
         success = any("SUCCESS" in code for code in (code1, code2))
 
         if success and total_bonus > 0:
-            next_time = now + timedelta(days=1)
+            next_time = now + timedelta(days=1) + timedelta(seconds=15)
             logger.info(
                 f"释放成功：共得 {total_bonus} 灵石，下次时间：{next_time.isoformat()}"
             )
