@@ -38,7 +38,7 @@ async def get_redpocket_gen(client: Client, message: Message):
             )
         except Exception as e:
             logger.exception(f"提交失败: 用户消息, 错误：{e}")
-    asyncio.sleep(20)
+    await asyncio.sleep(20)
     callback_data = message.reply_markup.inline_keyboard[0][0].callback_data
     match = message.matches[0]
     redpocket_name = match.group(2)
