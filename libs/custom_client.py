@@ -91,5 +91,8 @@ class Client(_Client):
                             exc_info=True,
                         )
         # 超过最大重试次数后，尝试 get_me 判断是否需要重启
-        if state_manager.get_item("BASIC", "auto_restart", "off") == "on":
+        if (
+            state_manager.get_item("BASIC", "auto_restart", "off") == "on"
+            and retries == self._invoke_retries
+        ):
             sys.exit(1)
