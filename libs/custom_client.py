@@ -33,11 +33,11 @@ class Client(_Client):
         while retries < self._invoke_retries:
             async with self._pool_semaphore:
                 try:
-                    #logger.debug(
+                    # logger.debug(
                     #    f"调用 {query.__class__.__name__} (尝试 {retries + 1}/{self._invoke_retries})"
-                    #)
+                    # )
                     response = await self._session_invoke(query, *args, **kwargs)
-                    #logger.debug(f"请求 {query.__class__.__name__} 成功")
+                    # logger.debug(f"请求 {query.__class__.__name__} 成功")
                     return response
                 except FloodWait as e:
                     wait_time = e.value
@@ -48,12 +48,23 @@ class Client(_Client):
                     retries += 1
 
                 except asyncio.TimeoutError as e:
-                    logger.error(f"TimeoutError for {query.__class__.__name__}",exc_info=True)
+
                     await asyncio.sleep(1)
                     retries += 1
+                    if retries < self._invoke_retries:
+                        logger.warning(
+                            f"TimeoutError for {query.__class__.__name__} 重试第{retries}/{self._invoke_retries}次"
+                        )
+                    else:
+                        logger.error(
+                            f"TimeoutError for {query.__class__.__name__}",
+                            exc_info=True,
+                        )
 
                 except RPCError as e:
-                    logger.error(f"RPCError for {query.__class__.__name__}",exc_info=True)
+                    logger.error(
+                        f"RPCError for {query.__class__.__name__}", exc_info=True
+                    )
                     raise
                     if isinstance(e, (Unauthorized, AuthKeyInvalid)):
                         raise
@@ -61,9 +72,17 @@ class Client(_Client):
                     retries += 1
 
                 except Exception as e:
-                    logger.error(f"意外错误 for {query.__class__.__name__}",exc_info=True)
+                    await asyncio.sleep(1)
                     retries += 1
+                    if retries < self._invoke_retries:
+                        logger.warning(
+                            f"意外错误 for {query.__class__.__name__} 重试第{retries}/{self._invoke_retries}次"
+                        )
+                    else:
+                        logger.error(
+                            f"意外错误 for {query.__class__.__name__}",
+                            exc_info=True,
+                        )
         # 超过最大重试次数后，尝试 get_me 判断是否需要重启
         if state_manager.get_item("BASIC", "auto_restart", "off") == "on":
             sys.exit(1)
-            
