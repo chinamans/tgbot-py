@@ -54,6 +54,7 @@ class Client(_Client):
 
                 except RPCError as e:
                     logger.error(f"RPCError for {query.__class__.__name__}",exc_info=True)
+                    raise
                     if isinstance(e, (Unauthorized, AuthKeyInvalid)):
                         raise
                     await asyncio.sleep(1)
