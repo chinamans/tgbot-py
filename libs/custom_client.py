@@ -62,14 +62,21 @@ class Client(_Client):
                         )
 
                 except RPCError as e:
+                    break
+                    await asyncio.sleep(1)
+                    retries += 1
+                    if retries < self._invoke_retries:
+                        logger.warning(
+                            f"RPCError for {query.__class__.__name__} 重试第{retries}/{self._invoke_retries}次"
+                        )
+                    else:
+                        logger.error(
+                            f"RPCError for {query.__class__.__name__}",
+                            exc_info=True,
+                        )
                     logger.error(
                         f"RPCError for {query.__class__.__name__}", exc_info=True
                     )
-                    raise
-                    if isinstance(e, (Unauthorized, AuthKeyInvalid)):
-                        raise
-                    await asyncio.sleep(1)
-                    retries += 1
 
                 except Exception as e:
                     await asyncio.sleep(1)
