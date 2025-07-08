@@ -103,9 +103,6 @@ async def blockyword_add_remove(client: Client, message: Message):
         await message.reply("无效参数。请使用 `add` 或 `remove`")
 
 
-
-
-
 SITE_NAME = "ZHUQUE"
 ACTION = "dajie"
 MESSAGE = "朱雀打劫设置"
@@ -125,13 +122,13 @@ class Raiding(Method):
 inline_button = InlineButton(SITE_NAME, ACTION, MESSAGE)
 
 
-def main_keyboard():
+async def main_keyboard():
     return InlineKeyboardMarkup(
         [
-            [inline_button.create_button(Raiding.fanda)],
-            [inline_button.create_button(Raiding.fanxian)],
-            [inline_button.create_button(Raiding.probability)],
-            [inline_button.close_button()],
+            [await inline_button.create_button(Raiding.fanda)],
+            [await inline_button.create_button(Raiding.fanxian)],
+            [await inline_button.create_button(Raiding.probability)],
+            [await inline_button.close_button()],
         ]
     )
 
