@@ -138,7 +138,7 @@ inline_button.set_main_keyboard(main_keyboard)
 
 @Client.on_message(filters.chat(MY_TGID) & filters.command(ACTION))
 async def ydx_set(_, message: Message):
-    await message.reply(inline_button.main_message(), reply_markup=main_keyboard())
+    await message.reply(inline_button.main_message(), reply_markup=await main_keyboard())
 
 
 @Client.on_callback_query(CallbackDataFromFilter(ACTION))
