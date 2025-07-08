@@ -128,7 +128,7 @@ async def main_keyboard():
             [await inline_button.create_button(Raiding.fanda)],
             [await inline_button.create_button(Raiding.fanxian)],
             [await inline_button.create_button(Raiding.probability)],
-            [await inline_button.close_button()],
+            [inline_button.close_button()],
         ]
     )
 
