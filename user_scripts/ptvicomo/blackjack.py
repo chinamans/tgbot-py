@@ -138,6 +138,8 @@ class Deck:
                     return -1
             return 0
         elif player_value > 21 and dealer_value > 21:
+            if len(self.dealer_hand)>len(self.player_hand):
+                return -1
             return 0
         elif player_value > 21:
             return -1
