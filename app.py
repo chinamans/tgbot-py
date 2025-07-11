@@ -4,11 +4,10 @@ import json
 from pathlib import Path
 
 # 第三方库
-from pyrogram import idle
+from pyrogram import idle,Client
 
 # 自定义模块
 from config.config import API_HASH, API_ID, BOT_TOKEN, PT_GROUP_ID, proxy_set
-from libs.custom_client import Client
 from libs.log import logger
 from libs.sys_info import system_version_get
 from models import create_all, async_engine
