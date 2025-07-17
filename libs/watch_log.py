@@ -17,8 +17,7 @@ async def monitor_log_file(log_file_path, trigger_string, command):
                 line = await f.readline()  # 异步读取新行
                 if line:
                     if trigger_string in line:
-                        logger.info(1)
-                        # await bash(command)
+                        await bash(command)
                 else:
                     # 检查文件是否被截断
                     current_size = os.path.getsize(log_file_path)
