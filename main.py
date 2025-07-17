@@ -21,7 +21,7 @@ async def main():
         "command": "supervisorctl restart main",
     }
 
-    await asyncio.gather(start_app(), monitor_log_file(log_configs))
+    await asyncio.gather(start_app(), monitor_log_file(**log_configs))
 
 
 if __name__ == "__main__":
