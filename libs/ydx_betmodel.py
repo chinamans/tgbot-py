@@ -100,35 +100,37 @@ class B(BetModel):
 
 
 class E(BetModel):
-    def __init__(self):
-        super().__init__()
-        self.prediction_count = 0  # 预测次数计数器
-        self.is_reverse_mode = False  # 当前是否为反向模式
-    
     def guess(self, data):
-        # 每38次预测切换一次模式
-        if self.prediction_count > 0 and self.prediction_count % 6 == 0:
-            self.is_reverse_mode = not self.is_reverse_mode
-            logger.info(f"E策略切换模式: {'反向' if self.is_reverse_mode else '跟风'}")
-        
-        # 首次预测或跟风模式：预测与最近结果相同
-        if self.prediction_count == 0 or not self.is_reverse_mode:
-            self.guess_dx = data[-1]
-        # 反向模式：预测与最近结果相反
+        # 收集出现频率
+        if len(data) >= 10:  # 至少收集的数据
+            # 计算0和1各自的出现频率
+            count_0 = data.count(0)
+            count_1 = data.count(1)
+            
+            # 选择出现频率更高的结果
+            if count_0 > count_1:
+                self.guess_dx = 0
+            elif count_1 > count_0:
+                self.guess_dx = 1
+            else:
+                # 当0和1数量相等时，考虑最近5次的结果趋势
+                recent_data = data[-5:] if len(data) >= 5 else data
+                recent_0 = recent_data.count(0)
+                recent_1 = recent_data.count(1)
+                
+                if recent_0 > recent_1:
+                    self.guess_dx = 0
+                elif recent_1 > recent_0:
+                    self.guess_dx = 1
+                else:
+                    # 随机选择，看脸
+                    self.guess_dx = random.randint(0, 1)
         else:
-            self.guess_dx = 1 - data[-1]
-        
-        self.prediction_count += 1
+            # 随机选择，看脸
+            self.guess_dx = random.randint(0, 1)
+            
         return self.guess_dx
-    
-    def test(self, data: list[int]):
-        # 重置状态确保每次测试独立
-        self.prediction_count = 0
-        self.is_reverse_mode = False
-        self.fail_count = 0
-        self.guess_dx = -1
-        return super().test(data)
-    
+
     def get_bet_count(self, data: list[int], start_count=0, stop_count=0):
         bet_count = self.fail_count - start_count
         if 0 <= bet_count < stop_count:
