@@ -1,7 +1,6 @@
 from abc import ABC, abstractmethod
-import random
-
 from app import logger
+import random
 
 class BetModel(ABC):
     fail_count: int = 0
@@ -107,9 +106,12 @@ class E(BetModel):
         # 首判前四场，相同追投，不相同那就下一个
         last_4 = data[-4:]
         if all(x == last_4[0] for x in last_4):
-            # 4场出现相同结果时，选择当前结果
-            self.guess_dx = last_4[0]
-            return self.guess_dx
+            # 检查连败次数
+            if self.fail_count < 4:  # 判断连败次数，现在是3次
+                # 4场出现相同结果时，选择当前结果
+                self.guess_dx = last_4[0]
+                return self.guess_dx
+            # 如果连败3次或以上，直接跳过，不要犹豫
         
         # 记录和解析近40场记录
         analysis_data = data[-40:] if len(data) >= 40 else data
