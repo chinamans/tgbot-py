@@ -102,7 +102,7 @@ class B(BetModel):
 class E(BetModel):
     def guess(self, data):
         # 收集出现频率
-        if len(data) >= 10:  # 至少收集的数据
+        if len(data) >= 40:  # 至少收集的数据
             # 计算0和1各自的出现频率
             count_0 = data.count(0)
             count_1 = data.count(1)
