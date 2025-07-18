@@ -107,7 +107,7 @@ class E(BetModel):
     
     def guess(self, data):
         # 每38次预测切换一次模式
-        if self.prediction_count > 0 and self.prediction_count % 38 == 0:
+        if self.prediction_count > 0 and self.prediction_count % 6 == 0:
             self.is_reverse_mode = not self.is_reverse_mode
             logger.info(f"E策略切换模式: {'反向' if self.is_reverse_mode else '跟风'}")
         
