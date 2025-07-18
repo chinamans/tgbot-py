@@ -1,8 +1,6 @@
 from abc import ABC, abstractmethod
 import random
-
 from app import logger
-
 
 class BetModel(ABC):
     fail_count: int = 0
@@ -102,13 +100,35 @@ class B(BetModel):
 
 
 class E(BetModel):
+    def __init__(self):
+        super().__init__()
+        self.prediction_count = 0  # 预测次数计数器
+        self.is_reverse_mode = False  # 当前是否为反向模式
+    
     def guess(self, data):
-        if self.guess_dx == -1:
-            self.guess_dx = random.randint(0, 1)
-        if self.fail_count % 2 == 0:
-            self.guess_dx = random.randint(0, 1)
+        # 每38次预测切换一次模式
+        if self.prediction_count > 0 and self.prediction_count % 38 == 0:
+            self.is_reverse_mode = not self.is_reverse_mode
+            logger.info(f"E策略切换模式: {'反向' if self.is_reverse_mode else '跟风'}")
+        
+        # 首次预测或跟风模式：预测与最近结果相同
+        if self.prediction_count == 0 or not self.is_reverse_mode:
+            self.guess_dx = data[-1]
+        # 反向模式：预测与最近结果相反
+        else:
+            self.guess_dx = 1 - data[-1]
+        
+        self.prediction_count += 1
         return self.guess_dx
-
+    
+    def test(self, data: list[int]):
+        # 重置状态确保每次测试独立
+        self.prediction_count = 0
+        self.is_reverse_mode = False
+        self.fail_count = 0
+        self.guess_dx = -1
+        return super().test(data)
+    
     def get_bet_count(self, data: list[int], start_count=0, stop_count=0):
         bet_count = self.fail_count - start_count
         if 0 <= bet_count < stop_count:
