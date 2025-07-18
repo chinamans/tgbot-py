@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 import random
+
 from app import logger
 
 class BetModel(ABC):
@@ -80,12 +81,10 @@ class BetModel(ABC):
     def get_bet_bonus(self, start_bonus, bet_count):
         return start_bonus * (2 ** (bet_count + 1) - 1)
 
-
 class A(BetModel):
     def guess(self, data):
         self.guess_dx = 1 - data[-1]
         return self.guess_dx
-
 
 class B(BetModel):
     def guess(self, data):
@@ -98,36 +97,52 @@ class B(BetModel):
             return bet_count
         return -1
 
-
 class E(BetModel):
     def guess(self, data):
-        # 收集出现频率
-        if len(data) >= 40:  # 至少收集的数据
-            # 计算0和1各自的出现频率
-            count_0 = data.count(0)
-            count_1 = data.count(1)
-            
-            # 选择出现频率更高的结果
-            if count_0 > count_1:
-                self.guess_dx = 0
-            elif count_1 > count_0:
-                self.guess_dx = 1
-            else:
-                # 当0和1数量相等时，考虑最近5次的结果趋势
-                recent_data = data[-5:] if len(data) >= 5 else data
-                recent_0 = recent_data.count(0)
-                recent_1 = recent_data.count(1)
-                
-                if recent_0 > recent_1:
-                    self.guess_dx = 0
-                elif recent_1 > recent_0:
-                    self.guess_dx = 1
-                else:
-                    # 随机选择，看脸
-                    self.guess_dx = random.randint(0, 1)
+        # 需求4：如果数据不足时，固定选择0
+        if len(data) < 4:
+            self.guess_dx = 0
+            return self.guess_dx
+        
+        # 需求1：首先判断近4场的记录
+        last_4 = data[-4:]
+        if all(x == last_4[0] for x in last_4):
+            # 4场出现相同结果时，选择当前结果
+            self.guess_dx = last_4[0]
+            return self.guess_dx
+        
+        # 需求2：分析近40场的记录
+        # 确定分析范围（近40场，如果不足则使用全部数据）
+        analysis_data = data[-40:] if len(data) >= 40 else data
+        
+        # 统计0和1的频率
+        count_0 = analysis_data.count(0)
+        count_1 = analysis_data.count(1)
+        
+        # 选择出现频率最低的结果
+        if count_0 < count_1:
+            self.guess_dx = 0
+            return self.guess_dx
+        elif count_1 < count_0:
+            self.guess_dx = 1
+            return self.guess_dx
+        
+        # 需求3：0和1出现的频率一样时，分析近5场的记录
+        # 确定分析范围（近5场，如果不足则使用全部数据）
+        recent_5 = data[-5:] if len(data) >= 5 else data
+        
+        # 统计0和1的频率
+        recent_0 = recent_5.count(0)
+        recent_1 = recent_5.count(1)
+        
+        # 选择出现频率最高的结果
+        if recent_0 > recent_1:
+            self.guess_dx = 0
+        elif recent_1 > recent_0:
+            self.guess_dx = 1
         else:
-            # 随机选择，看脸
-            self.guess_dx = random.randint(0, 1)
+            # 如果还是相同，固定选择0（需求4）
+            self.guess_dx = 0
             
         return self.guess_dx
 
@@ -137,9 +152,7 @@ class E(BetModel):
             return bet_count
         return -1
 
-
 models: dict[str, BetModel] = {"a": A(), "b": B(), "e": E()}
-
 
 def test(data: list[int]):
     data.reverse()
