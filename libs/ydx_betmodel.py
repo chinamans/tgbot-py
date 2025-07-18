@@ -99,20 +99,19 @@ class B(BetModel):
 
 class E(BetModel):
     def guess(self, data):
-        # 需求4：如果数据不足时，固定选择0
+        # 没有数据支撑时，死磕0
         if len(data) < 4:
             self.guess_dx = 0
             return self.guess_dx
         
-        # 需求1：首先判断近4场的记录
+        # 首判前四场，相同追投，不相同那就下一个
         last_4 = data[-4:]
         if all(x == last_4[0] for x in last_4):
             # 4场出现相同结果时，选择当前结果
             self.guess_dx = last_4[0]
             return self.guess_dx
         
-        # 需求2：分析近40场的记录
-        # 确定分析范围（近40场，如果不足则使用全部数据）
+        # 记录和解析近40场记录
         analysis_data = data[-40:] if len(data) >= 40 else data
         
         # 统计0和1的频率
@@ -127,8 +126,7 @@ class E(BetModel):
             self.guess_dx = 1
             return self.guess_dx
         
-        # 需求3：0和1出现的频率一样时，分析近5场的记录
-        # 确定分析范围（近5场，如果不足则使用全部数据）
+        # 0和1出现的频率一样时，分析近5场的记录
         recent_5 = data[-5:] if len(data) >= 5 else data
         
         # 统计0和1的频率
@@ -141,7 +139,7 @@ class E(BetModel):
         elif recent_1 > recent_0:
             self.guess_dx = 1
         else:
-            # 如果还是相同，固定选择0（需求4）
+            # 如果还是相同，继续死磕0
             self.guess_dx = 0
             
         return self.guess_dx
