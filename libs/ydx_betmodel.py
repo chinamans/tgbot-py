@@ -82,6 +82,14 @@ class BetModel(ABC):
 
 class A(BetModel):
     def guess(self, data):
+        # 新增判断前三场结果；
+        if len(data) >= 3:
+            last_3 = data[-3:]
+            if all(x == last_3[0] for x in last_3):
+                # 三场结果一致，顺龙；
+                self.guess_dx = last_3[0]
+                return self.guess_dx
+        
         self.guess_dx = 1 - data[-1]
         return self.guess_dx
 
