@@ -82,15 +82,34 @@ class BetModel(ABC):
 
 class A(BetModel):
     def guess(self, data):
-        # 新增判断前三场结果；
-        if len(data) >= 3:
-            last_3 = data[-3:]
-            if all(x == last_3[0] for x in last_3):
-                # 三场结果一致，顺龙；
-                self.guess_dx = last_3[0]
-                return self.guess_dx
+        # 绝对连败控制
+        if self.fail_count >= 5:
+            self.guess_dx = random.randint(0, 1)
+            return self.guess_dx
         
-        self.guess_dx = 1 - data[-1]
+        # 初级保护：连败3次后混合策略
+        if self.fail_count >= 3:
+            # 80%反向预测，20%跟随预测
+            if random.random() < 0.8:
+                # 反向预测
+                if len(data) > 0:
+                    self.guess_dx = 1 - data[-1]
+                else:
+                    self.guess_dx = random.randint(0, 1)
+            else:
+                # 跟随预测
+                if len(data) > 0:
+                    self.guess_dx = data[-1]
+                else:
+                    self.guess_dx = random.randint(0, 1)
+            return self.guess_dx
+        
+        # 纯反向预测逻辑
+        if len(data) > 0:
+            self.guess_dx = 1 - data[-1]
+        else:
+            self.guess_dx = random.randint(0, 1)
+        
         return self.guess_dx
 
 class B(BetModel):
