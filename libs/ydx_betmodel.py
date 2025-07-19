@@ -107,7 +107,7 @@ class E(BetModel):
         last_4 = data[-4:]
         if all(x == last_4[0] for x in last_4):
             # 检查连败次数
-            if self.fail_count < 4:  # 判断连败次数，现在是3次
+            if self.fail_count < 10:  # 判断连败次数，现在是3次
                 # 4场出现相同结果时，选择当前结果
                 self.guess_dx = last_4[0]
                 return self.guess_dx
@@ -121,10 +121,10 @@ class E(BetModel):
         count_1 = analysis_data.count(1)
         
         # 选择出现频率最高的结果
-        if count_0 > count_1:
+        if count_0 < count_1:
             self.guess_dx = 0
             return self.guess_dx
-        elif count_1 > count_0:
+        elif count_1 < count_0:
             self.guess_dx = 1
             return self.guess_dx
         
@@ -136,9 +136,9 @@ class E(BetModel):
         recent_1 = recent_5.count(1)
         
         # 选择出现频率最高的结果
-        if recent_0 < recent_1:
+        if recent_0 > recent_1:
             self.guess_dx = 0
-        elif recent_1 < recent_0:
+        elif recent_1 > recent_0:
             self.guess_dx = 1
         else:
             # 如果还是相同，继续死磕0
