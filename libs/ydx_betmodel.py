@@ -113,8 +113,8 @@ class E(BetModel):
                 return self.guess_dx
             # 如果连败3次或以上，直接跳过，不要犹豫
         
-        # 记录和解析近40场记录
-        analysis_data = data[-40:] if len(data) >= 40 else data
+        # 记录和解析近41场记录
+        analysis_data = data[-41:] if len(data) >= 41 else data
         
         # 统计0和1的频率
         count_0 = analysis_data.count(0)
