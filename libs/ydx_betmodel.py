@@ -103,8 +103,8 @@ class E(BetModel):
             self.guess_dx = 0
             return self.guess_dx
         
-        # 首判前四场，相同追投，不相同那就下一个
-        last_4 = data[-4:]
+        # 首判前三场，相同追投，不相同那就下一个
+        last_4 = data[-3:]
         if all(x == last_4[0] for x in last_4):
             # 检查连败次数
             if self.fail_count < 10:  # 判断连败次数，现在是3次
